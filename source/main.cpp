@@ -218,7 +218,7 @@ int main(int argc, const  char **argv) {
 	
 	
 	usbdvd = new CUSBDVD();
-	
+	printf("USBDVD INIT DONE\r\n");
 	
 	
 	GUI = new CGUI(newResW,newResH);

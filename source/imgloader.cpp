@@ -37,14 +37,14 @@ void CImgLoader::LoadBaseTextures(std::string basepath){
 	icons.Next_Chapter_Icon = Renderer->load_texture(basepath+"/player/next_chapter.png",DkImageFormat_RGBA8_Unorm, 0);
 	icons.Prev_Chapter_Icon = Renderer->load_texture(basepath+"/player/prev_chapter.png",DkImageFormat_RGBA8_Unorm, 0);
 
-    icons.Eject_Icon = Renderer->load_texture(basepath+"dvdeject.png",DkImageFormat_RGBA8_Unorm, 0);
-	icons.Optical_Disc_Icon = Renderer->load_texture(basepath+"optical_disc.png",DkImageFormat_RGBA8_Unorm, 0);
-	icons.Mount_Icon = Renderer->load_texture(basepath+"dvdmount.png",DkImageFormat_RGBA8_Unorm, 0);
+    icons.Eject_Icon = Renderer->load_texture(basepath+"/dvdeject.png",DkImageFormat_RGBA8_Unorm, 0);
+	icons.Optical_Disc_Icon = Renderer->load_texture(basepath+"/optical_disc.png",DkImageFormat_RGBA8_Unorm, 0);
+	icons.Mount_Icon = Renderer->load_texture(basepath+"/dvdmount.png",DkImageFormat_RGBA8_Unorm, 0);
 
-    icons.DVDVideo_Icon = Renderer->load_texture(basepath+"dvd_video_icon.png",DkImageFormat_RGBA8_Unorm, 0);
-	icons.BluRay_Icon = Renderer->load_texture(basepath+"blu_ray_icon.png",DkImageFormat_RGBA8_Unorm, 0);
-	icons.SVCD_Icon = Renderer->load_texture(basepath+"svcd_icon.png",DkImageFormat_RGBA8_Unorm, 0);
-    icons.VCD_Icon = Renderer->load_texture(basepath+"vcd_icon.png",DkImageFormat_RGBA8_Unorm, 0);
+    icons.DVDVideo_Icon = Renderer->load_texture(basepath+"/dvd_video_icon.png",DkImageFormat_RGBA8_Unorm, 0);
+	icons.BluRay_Icon = Renderer->load_texture(basepath+"/blu_ray_icon.png",DkImageFormat_RGBA8_Unorm, 0);
+	icons.SVCD_Icon = Renderer->load_texture(basepath+"/svcd_icon.png",DkImageFormat_RGBA8_Unorm, 0);
+    icons.VCD_Icon = Renderer->load_texture(basepath+"/vcd_icon.png",DkImageFormat_RGBA8_Unorm, 0);
 
 
 	NXLOG::DEBUGLOG("DONE\r\n");
