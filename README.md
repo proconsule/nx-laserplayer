@@ -7,7 +7,7 @@ Nintendo Switch Video Player for Optical Disc (CD/DVD/BD)
 Thanks to [libusbdvd](https://github.com/proconsule/libusbdvd) it features:
 
  - DVD Video playback (supporting Commercial DVD-Video)
- - Blu-ray playback (Commericial BD NOT supported right now)
+ - Blu-ray playback (Commericial Blu-ray NOT supported right now and some Blu-ray may not work)
  - SVCD playback
  - VCD playback
 
