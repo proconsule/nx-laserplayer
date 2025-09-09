@@ -1,0 +1,5 @@
+*.nro
+*.elf
+*.nacp
+libusbdvd*
+build/
