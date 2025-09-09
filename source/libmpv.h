@@ -38,6 +38,9 @@ public:
 	void seekToSecond(double seconds);
 	void seek(double position,bool osd);
     void setDeinterlace(bool _active);
+    
+    void Pause();
+    void Resume();
 	
 	mpv_handle *getHandle();
 

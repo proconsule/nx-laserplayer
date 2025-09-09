@@ -203,11 +203,11 @@ void CustomSlider(bool * _inuse,const char* label, ImVec2 *size, float* value, I
 }
 
 
-void LCD_Display_Widget(const char *_mainlabel,uint32_t _curr_msec,uint32_t _duration_msec,ImVec2 *_size){
+void LCD_Display_Widget(const char *_mainlabel,uint32_t _curr_msec,uint32_t _duration_msec,ImVec2 *_size,Texture  *_disc_img){
     
-    
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 0.6f));
-    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 12.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 12.0f*multiplyRes);
     
     ImGui::BeginChild("##playervis_id", ImVec2(_size->x, _size->y), false, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse);
     ImVec2 _startpos = ImGui::GetCursorPos();
@@ -215,8 +215,8 @@ void LCD_Display_Widget(const char *_mainlabel,uint32_t _curr_msec,uint32_t _dur
     
     float labewidth = ImGui::CalcTextSize(_mainlabel).x;
     
-    ImGui::SetCursorPosX(ImGui::GetCursorPosX()+10.0f + (_size->x-labewidth)*0.5f);
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY()+10.0f);
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX()+10.0f*multiplyRes + (_size->x-labewidth)*0.5f);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY()+10.0f*multiplyRes);
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
     ImGui::Text(_mainlabel);
     
@@ -226,22 +226,33 @@ void LCD_Display_Widget(const char *_mainlabel,uint32_t _curr_msec,uint32_t _dur
             
     float timestringwidth = ImGui::CalcTextSize(timestring.c_str()).x;
     
-    
-             
-    ImGui::SetCursorPosY(_startpos.y+40.0f);
-    ImGui::SetCursorPosX(_startpos.x+(_size->x)-timestringwidth-10.0f);
+    ImGuiWindow* window = ImGui::GetCurrentWindow();
+    ImVec2 myimgpos = window->DC.CursorPos;         
+    ImGui::SetCursorPosY(_startpos.y+45.0f*multiplyRes);
+    ImGui::SetCursorPosX(_startpos.x+(_size->x)-timestringwidth-10.0f*multiplyRes);
     ImGui::Text(timestring.c_str());
     ImGui::PopStyleColor(2);
     ImGui::PopStyleVar();
+    
+    ImGui::SetCursorPosY(_startpos.y);
+    ImGui::SetCursorPosX(_startpos.x);
+    
+    
+    myimgpos = ImVec2(myimgpos.x+_size->x-70.0f*multiplyRes,myimgpos.y-10.0f*multiplyRes);
+    if (_disc_img) {
+        ImVec2 image_size = ImVec2(60.0f*multiplyRes,_disc_img->height*(60.0f*multiplyRes)/_disc_img->width);
+        draw_list->AddImage((void *)(intptr_t)_disc_img->id, myimgpos, ImVec2(myimgpos.x + image_size.x, myimgpos.y + image_size.y));
+    }
+     
     
     
     float _perc = _curr_msec*100.0f/_duration_msec;
     static ImColor greencol(0.f, 1.f, 0.f, 1.f);
     static ImColor barbackcol(0.3f, 0.3f, 0.3f, 1.f);
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    float barwidth = 290.0f*_perc/100.0f;
-    draw_list->AddRectFilled(ImVec2(_startscreenpos.x+10.0f, _startscreenpos.y+40.0f), ImVec2(_startscreenpos.x+300, _startscreenpos.y+65.0f), barbackcol, 3.f, 0 );
-    draw_list->AddRectFilled(ImVec2(_startscreenpos.x+10.0f, _startscreenpos.y+40.0f), ImVec2(_startscreenpos.x+10+barwidth, _startscreenpos.y+65.0f), greencol, 3.f, 0 );
+    //ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    float barwidth = 290.0f*multiplyRes*_perc/100.0f;
+    draw_list->AddRectFilled(ImVec2(_startscreenpos.x+10.0f*multiplyRes, _startscreenpos.y+45.0f*multiplyRes), ImVec2(_startscreenpos.x+300*multiplyRes, _startscreenpos.y+65.0f*multiplyRes), barbackcol, 3.f, 0 );
+    draw_list->AddRectFilled(ImVec2(_startscreenpos.x+10.0f*multiplyRes, _startscreenpos.y+45.0f*multiplyRes), ImVec2(_startscreenpos.x+10*multiplyRes+barwidth, _startscreenpos.y+65.0f*multiplyRes), greencol, 3.f, 0 );
     
     
     ImGui::EndChild();
@@ -292,13 +303,6 @@ bool Custom_Button(const char* _label, ImVec2 _size,float _scale) {
     // Sfondo
     draw_list->AddRectFilled(bb.Min, bb.Max, bg_color, style.FrameRounding);
     
-    // Bordi per effetto rilievo
-    //draw_list->AddLine(bb.Min, ImVec2(bb.Max.x, bb.Min.y), border_light, 2.0f);
-    //draw_list->AddLine(bb.Min, ImVec2(bb.Min.x, bb.Max.y), border_light, 2.0f);
-    //draw_list->AddLine(ImVec2(bb.Min.x, bb.Max.y), bb.Max, border_dark, 2.0f);
-    //draw_list->AddLine(ImVec2(bb.Max.x, bb.Min.y), bb.Max, border_dark, 2.0f);
-
-    // Calcolo posizione testo
     ImVec2 text_pos;
     text_pos.x = bb.Min.x + (_size.x - label_size.x) * 0.5f;
     text_pos.y = bb.Min.y + (_size.y - label_size.y) * 0.5f;
@@ -308,7 +312,6 @@ bool Custom_Button(const char* _label, ImVec2 _size,float _scale) {
         text_pos.y += 1.0f;
     }
     
-    //draw_list->AddText(text_pos, ImGui::GetColorU32(ImGuiCol_Text), _label);
     ImFont* font = ImGui::GetFont();
     float imfontsize = ImGui::CalcTextSize("A").y;
     draw_list->AddText(font, imfontsize*_scale, text_pos, ImGui::GetColorU32(ImGuiCol_Text), _label, nullptr);
@@ -316,7 +319,7 @@ bool Custom_Button(const char* _label, ImVec2 _size,float _scale) {
     return pressed;
 }
 
-bool Custom_ButtonwImage(const char* _label, ImVec2 _size, float _scale, void * texid) {
+bool Custom_ButtonwImage(const char* _label, ImVec2 _size, float _scale,Texture * _buttexture) {
     ImGuiWindow* window = ImGui::GetCurrentWindow();
     if (window->SkipItems) return false;
 
@@ -331,11 +334,12 @@ bool Custom_ButtonwImage(const char* _label, ImVec2 _size, float _scale, void * 
     label_size.y = label_size.y * _scale;
     
     // Dimensione dell'immagine
-    ImVec2 image_size = ImVec2(label_size.y, label_size.y); // Usa l'altezza del testo come dimensione dell'immagine (quadrata)
     
     // Calcola la larghezza totale del contenuto (testo + immagine)
     float content_width = label_size.x;
-    if (texid) {
+    if (_buttexture) {
+        ImVec2 image_size = ImVec2(label_size.y, _buttexture->height*label_size.y/_buttexture->width); // Usa l'altezza del testo come dimensione dell'immagine (quadrata)
+    
         content_width += image_size.x + style.ItemSpacing.x; // Aggiungi la larghezza dell'immagine e uno spazio
     }
 
@@ -360,13 +364,33 @@ bool Custom_ButtonwImage(const char* _label, ImVec2 _size, float _scale, void * 
 
     ImDrawList* draw_list = window->DrawList;
     draw_list->AddRectFilled(bb.Min, bb.Max, bg_color, style.FrameRounding);
-
-    // Calcolo posizione testo e immagine
+    
+    if(hovered){
+        ImVec2 _h_min = bb.Min;
+        ImVec2 _h_max = bb.Max;
+        _h_min.x = _h_min.x-8.0f;
+        _h_min.y = _h_min.y-8.0f;
+        _h_max.x = _h_max.x+8.0f;
+        _h_max.y = _h_max.y+8.0f;
+        
+        draw_list->AddRect(_h_min, _h_max, IM_COL32(255, 255, 255, 255), style.FrameRounding,0,2.0f);
+    }
+    else if(held){
+        ImVec2 _h_min = bb.Min;
+        ImVec2 _h_max = bb.Max;
+        _h_min.x = _h_min.x-12.0f;
+        _h_min.y = _h_min.y-12.0f;
+        _h_max.x = _h_max.x+12.0f;
+        _h_max.y = _h_max.y+12.0f;
+        
+        draw_list->AddRect(_h_min, _h_max, IM_COL32(255, 255, 255, 255), style.FrameRounding,0,2.0f);
+    }
+    
+    
     ImVec2 total_size = ImVec2(content_width, label_size.y);
     ImVec2 text_pos;
     ImVec2 image_pos;
 
-    // Posizione di partenza per centrare il contenuto
     ImVec2 content_start_pos = ImVec2(
         bb.Min.x + (_size.x - total_size.x) * 0.5f,
         bb.Min.y + (_size.y - total_size.y) * 0.5f
@@ -375,8 +399,9 @@ bool Custom_ButtonwImage(const char* _label, ImVec2 _size, float _scale, void * 
     image_pos = content_start_pos;
     text_pos = ImVec2(content_start_pos.x, content_start_pos.y);
 
-    if (texid) {
-        // Se c'è un'immagine, la prima cosa è l'immagine
+    if (_buttexture) {
+        ImVec2 image_size = ImVec2(label_size.y, _buttexture->height*label_size.y/_buttexture->width); // Usa l'altezza del testo come dimensione dell'immagine (quadrata)
+    
         image_pos = content_start_pos;
         text_pos.x = content_start_pos.x + image_size.x + style.ItemSpacing.x; // Sposta il testo dopo l'immagine
     }
@@ -388,14 +413,93 @@ bool Custom_ButtonwImage(const char* _label, ImVec2 _size, float _scale, void * 
         text_pos.y += 1.0f;
     }
 
-    // Disegna l'immagine se esiste
-    if (texid) {
-        
-        draw_list->AddImage(texid, image_pos, ImVec2(image_pos.x + image_size.x, image_pos.y + image_size.y));
+    if (_buttexture) {
+        ImVec2 image_size = ImVec2(label_size.y, _buttexture->height*label_size.y/_buttexture->width); // Usa l'altezza del testo come dimensione dell'immagine (quadrata)
+        image_pos = ImVec2(image_pos.x,image_pos.y+(label_size.y-image_size.y)*0.5f/*-style.ItemSpacing.y*2*/);
+        draw_list->AddImage((void *)(intptr_t)_buttexture->id, image_pos, ImVec2(image_pos.x + image_size.x, image_pos.y + image_size.y));
     }
 
-    // Disegna il testo
     draw_list->AddText(font, imfontsize * _scale, text_pos, ImGui::GetColorU32(ImGuiCol_Text), _label, nullptr);
 
     return pressed;
+}
+
+bool Custom_CircleButton(const char* _label,float _diameter,Texture * _buttexture){
+    ImGuiWindow* window = ImGui::GetCurrentWindow();
+    if (window->SkipItems) return false;
+
+    ImGuiContext& g = *ImGui::GetCurrentContext();
+    const ImGuiStyle& style = g.Style;
+    const ImGuiID id = window->GetID(_label);
+    float content_width = _diameter;
+    
+    ImVec2 pos = window->DC.CursorPos;
+    
+    const ImRect bb(pos, ImVec2(pos.x + _diameter, pos.y + _diameter));
+    ImVec2 _size = ImVec2(_diameter,_diameter);
+    ImGui::ItemSize(_size, style.FramePadding.y);
+    if (!ImGui::ItemAdd(bb, id)) return false;
+
+    bool hovered, held;
+    bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held);
+
+    ImU32 bg_color;
+    if (held) {
+        bg_color = ImGui::GetColorU32(ImGuiCol_ButtonActive);
+    } else {
+        bg_color = hovered ? ImGui::GetColorU32(ImGuiCol_ButtonHovered) : ImGui::GetColorU32(ImGuiCol_Button);
+    }
+
+    ImDrawList* draw_list = window->DrawList;
+    draw_list->AddRectFilled(bb.Min, bb.Max, bg_color, style.FrameRounding);
+    
+    if(hovered){
+        ImVec2 _h_min = bb.Min;
+        ImVec2 _h_max = bb.Max;
+        _h_min.x = _h_min.x-8.0f;
+        _h_min.y = _h_min.y-8.0f;
+        _h_max.x = _h_max.x+8.0f;
+        _h_max.y = _h_max.y+8.0f;
+        
+        draw_list->AddRect(_h_min, _h_max, IM_COL32(255, 255, 255, 255), style.FrameRounding,0,2.0f);
+    }
+    else if(held){
+        ImVec2 _h_min = bb.Min;
+        ImVec2 _h_max = bb.Max;
+        _h_min.x = _h_min.x-12.0f;
+        _h_min.y = _h_min.y-12.0f;
+        _h_max.x = _h_max.x+12.0f;
+        _h_max.y = _h_max.y+12.0f;
+        
+        draw_list->AddRect(_h_min, _h_max, IM_COL32(255, 255, 255, 255), style.FrameRounding,0,2.0f);
+    }
+    
+    
+    ImVec2 total_size = ImVec2(content_width, _diameter);
+    ImVec2 text_pos;
+    ImVec2 image_pos;
+
+    ImVec2 content_start_pos = ImVec2(
+        bb.Min.x + (_size.x - total_size.x) * 0.5f,
+        bb.Min.y + (_size.y - total_size.y) * 0.5f
+    );
+    
+    image_pos = content_start_pos;
+    text_pos = ImVec2(content_start_pos.x, content_start_pos.y);
+
+    if (held) {
+        image_pos.x += 1.0f;
+        image_pos.y += 1.0f;
+        text_pos.x += 1.0f;
+        text_pos.y += 1.0f;
+    }
+
+    //ImFont* font = ImGui::GetFont();
+    //float imfontsize = ImGui::CalcTextSize("A").y;
+    //draw_list->AddText(font, imfontsize , text_pos, ImGui::GetColorU32(ImGuiCol_Text), _label, nullptr);
+    draw_list->AddImage((void *)(intptr_t)_buttexture->id, image_pos, ImVec2(image_pos.x + _diameter, image_pos.y + _diameter));
+    
+    
+    return pressed;
+    
 }

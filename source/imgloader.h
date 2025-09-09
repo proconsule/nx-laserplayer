@@ -22,6 +22,11 @@ typedef struct {
     Texture Eject_Icon;
     Texture Mount_Icon;
     Texture Optical_Disc_Icon;
+    
+    Texture VCD_Icon;
+    Texture SVCD_Icon;
+    Texture BluRay_Icon;
+    Texture DVDVideo_Icon;
 		
 } nxlaser_icon_struct;
 	

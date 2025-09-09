@@ -237,6 +237,13 @@ void libMpv::Stop(){
     mpv_command_string(handle, "stop");
 }
 
+void libMpv::Pause() {
+	mpv_command_string(handle, "set pause yes");
+}
+
+void libMpv::Resume() {
+	mpv_command_string(handle, "set pause no");
+}
 
 mpv_handle *libMpv::getHandle() {
     return handle;

@@ -25,8 +25,8 @@ void CGUI::PlayerGUI(){
         ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 2.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 25.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.0f*multiplyRes);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 25.0f*multiplyRes);
         
         ImGui::SetNextWindowSize(ImVec2(1240.0f*multiplyRes,(150*multiplyRes))); 
         if (ImGui::Begin("##playerwindow", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse)) {
@@ -36,9 +36,10 @@ void CGUI::PlayerGUI(){
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.8f, 1.0f));
             
             ImGui::SetCursorPos(ImVec2(ImGui::GetCursorPosX()+20.0f*multiplyRes,ImGui::GetCursorPosY()+25.0f*multiplyRes));
+           
             float _posx = ImGui::GetCursorPosX();
             float _posy = ImGui::GetCursorPosY();
-            if (ImGui::Button("##BACKC",ImVec2(40*multiplyRes,40*multiplyRes))){
+            if(Custom_CircleButton("##BACKC",40*multiplyRes,&imgloader->icons.Prev_Chapter_Icon)){
                 std::vector<TitleInfo> _titles_list;
                 if(libmpv->DVDNAV!=nullptr && libmpv->_playidx >= 0){
                     _titles_list = libmpv->DVDNAV->titles_info;
@@ -46,79 +47,70 @@ void CGUI::PlayerGUI(){
                 if(libmpv->BLURAYNAV!=nullptr && libmpv->_playidx >= 0){
                     _titles_list = libmpv->BLURAYNAV->titles_info;
                 }
-                
                 if(CurrentDiscType == DiscType::DVD_VIDEO){
-                    int currchapter = libmpv->DVDNAV->GetChapterIDX(libmpv->_playidx,libmpv->current_playback_time);
-                    if(currchapter>0 && currchapter<libmpv->DVDNAV->titles_info[libmpv->_playidx].chapters.size()){
+                int currchapter = 0;
+                if(libmpv->DVDNAV){
+                    currchapter = libmpv->DVDNAV->GetChapterIDX(libmpv->_playidx,libmpv->current_playback_time);
+                
+                }if(libmpv->BLURAYNAV){
+                    currchapter = libmpv->BLURAYNAV->GetChapterIDX(libmpv->_playidx,libmpv->current_playback_time);
+                
+                }
+                if(currchapter>0 && currchapter<libmpv->DVDNAV->titles_info[libmpv->_playidx].chapters.size()){
                         currchapter-=1;
                         libmpv->seekToSecond(libmpv->DVDNAV->titles_info[libmpv->_playidx].chapters[currchapter].start);
                     }
                 }
+                 
             }
             ImGui::SameLine();
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX()+10.0f*multiplyRes);
-            ImGui::SameLine();
-            ImGui::SetCursorPos(ImVec2(_posx,_posy));
-            ImGui::Image((void*)(intptr_t)imgloader->icons.Prev_Chapter_Icon.id, ImVec2(40*multiplyRes,40*multiplyRes));
-            ImGui::SameLine();
-            _posx = ImGui::GetCursorPosX();
-            _posy = ImGui::GetCursorPosY();
-            if (ImGui::Button("##REW",ImVec2(40*multiplyRes,40*multiplyRes))){
-                libmpv->seek(-60.0f,false);
-            }
-            ImGui::SameLine();
-             ImGui::SetCursorPos(ImVec2(_posx,_posy));
-            ImGui::Image((void*)(intptr_t)imgloader->icons.Rew_Icon.id, ImVec2(40*multiplyRes,40*multiplyRes));
-            ImGui::SameLine();
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX()+10.0f*multiplyRes);
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY()-5.0f*multiplyRes);
-            _posx = ImGui::GetCursorPosX();
-            _posy = ImGui::GetCursorPosY();
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX()+5.0f*multiplyRes);
             
-            if (ImGui::Button("##Play",ImVec2(50*multiplyRes,50*multiplyRes))){
-                
+            if(Custom_CircleButton("##REW",40*multiplyRes,&imgloader->icons.Rew_Icon)){
+                libmpv->seek(-60.0f,false);    
             }
-            ImGui::SameLine();
-            ImGui::SetCursorPos(ImVec2(_posx,_posy));
-            ImGui::Image((void*)(intptr_t)imgloader->icons.Play_Icon.id, ImVec2(50*multiplyRes,50*multiplyRes));
             ImGui::SameLine();
             
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX()+10.0f*multiplyRes);
+            //ImGui::SetCursorPosX(ImGui::GetCursorPosX()+5.0f*multiplyRes);
             ImGui::SetCursorPosY(ImGui::GetCursorPosY()-5.0f*multiplyRes);
-            _posx = ImGui::GetCursorPosX();
-            _posy = ImGui::GetCursorPosY();
-            if (ImGui::Button("##STOP",ImVec2(50*multiplyRes,50*multiplyRes))){
-				libmpv->Stop();
-            }ImGui::SameLine();
-            ImGui::SetCursorPos(ImVec2(_posx,_posy));
-            ImGui::Image((void*)(intptr_t)imgloader->icons.Stop_Icon.id, ImVec2(50*multiplyRes,50*multiplyRes));
-            ImGui::SameLine();
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX()+10.0f*multiplyRes);
-            _posx = ImGui::GetCursorPosX();
-            _posy = ImGui::GetCursorPosY();
-            if (ImGui::Button("##FF",ImVec2(40*multiplyRes,40*multiplyRes))){
-                 libmpv->seek(60.0f,false);
-            }
-            ImGui::SameLine();
-            ImGui::SetCursorPos(ImVec2(_posx,_posy));
-            ImGui::Image((void*)(intptr_t)imgloader->icons.FF_Icon.id, ImVec2(40*multiplyRes,40*multiplyRes));
-            ImGui::SameLine();
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX()+10.0f*multiplyRes);
-            _posx = ImGui::GetCursorPosX();
-            _posy = ImGui::GetCursorPosY();
-            if (ImGui::Button("##NEXTC",ImVec2(40*multiplyRes,40*multiplyRes))){
-                if(CurrentDiscType == DiscType::DVD_VIDEO){
-                    int currchapter = libmpv->DVDNAV->GetChapterIDX(libmpv->_playidx,libmpv->current_playback_time);
-                    if(currchapter<libmpv->DVDNAV->titles_info[libmpv->_playidx].chapters.size()){
-                        currchapter+=1;
-                        libmpv->seekToSecond(libmpv->DVDNAV->titles_info[libmpv->_playidx].chapters[currchapter].start);
-                    }
+            
+            if(libmpv->paused){
+                if(Custom_CircleButton("##Play",50*multiplyRes,&imgloader->icons.Pause_Icon)){
+                    libmpv->Resume();    
                 }
-                
+            }else{
+                if(Custom_CircleButton("##Play",50*multiplyRes,&imgloader->icons.Play_Icon)){
+                    libmpv->Pause();    
+                }
             }
             ImGui::SameLine();
-            ImGui::SetCursorPos(ImVec2(_posx,_posy));
-            ImGui::Image((void*)(intptr_t)imgloader->icons.Next_Chapter_Icon.id, ImVec2(40*multiplyRes,40*multiplyRes));
+            ImGui::SameLine();
+            //ImGui::SetCursorPosX(ImGui::GetCursorPosX()+5.0f*multiplyRes);
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY()-5.0f*multiplyRes);
+            if(Custom_CircleButton("##STOP",50*multiplyRes,&imgloader->icons.Stop_Icon)){
+                libmpv->Stop();    
+            }
+            ImGui::SameLine();
+            
+            if(Custom_CircleButton("##FF",40*multiplyRes,&imgloader->icons.FF_Icon)){
+                libmpv->seek(60.0f,false);        
+            }
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX()+5.0f*multiplyRes);
+            
+            if(Custom_CircleButton("##NEXTC",40*multiplyRes,&imgloader->icons.Next_Chapter_Icon)){
+                int currchapter = 0;
+                if(libmpv->DVDNAV){
+                    currchapter = libmpv->DVDNAV->GetChapterIDX(libmpv->_playidx,libmpv->current_playback_time);
+                
+                }if(libmpv->BLURAYNAV){
+                    currchapter = libmpv->BLURAYNAV->GetChapterIDX(libmpv->_playidx,libmpv->current_playback_time);
+                
+                }
+                currchapter+=1;
+                libmpv->seekToSecond(libmpv->DVDNAV->titles_info[libmpv->_playidx].chapters[currchapter].start);
+                        
+            }
             ImGui::SameLine();
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
             ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 12.0f);
@@ -142,7 +134,9 @@ void CGUI::PlayerGUI(){
                 LCD_Display_Widget("VCD",libmpv->current_playback_time*1000,libmpv->duration_playback_time*1000,&_displaysize);
             
             }if(CurrentDiscType == DiscType::BLU_RAY){
-                LCD_Display_Widget("Blu-ray",libmpv->current_playback_time*1000,libmpv->duration_playback_time*1000,&_displaysize);
+                int _chapidx = libmpv->BLURAYNAV->GetChapterIDX(libmpv->_playidx,libmpv->current_playback_time);
+                std::string chapstr = "Chapter " + std::to_string(_chapidx+1);
+                LCD_Display_Widget(chapstr.c_str(),libmpv->current_playback_time*1000,libmpv->duration_playback_time*1000,&_displaysize);
             
             }
             ImGui::PopStyleColor();
@@ -157,27 +151,44 @@ void CGUI::PlayerGUI(){
             ImVec4 slider_color = ImVec4(0.1f,0.8f,0.1f,1.0f);
             ImVec4 slider_knobcolor = ImVec4(0.4f,0.4f,0.4f,1.0f);
             ImVec4 slider_backcolor = ImVec4(0.1f,0.1f,0.1f,1.0f);
-            CustomSlider(&volume_slider_active,"##AAAAA:",&slider_size,&volval,&slider_minmax,&slider_color,&slider_knobcolor, &slider_backcolor);
+            CustomSlider(&volume_slider_active,"##volslider:",&slider_size,&volval,&slider_minmax,&slider_color,&slider_knobcolor, &slider_backcolor);
             
             
-            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f*multiplyRes);
             ImGui::SetCursorPosX(ImGui::GetCursorPosX()+20.0f*multiplyRes);
             ImGui::SetCursorPosY(ImGui::GetCursorPosY()+30.0f*multiplyRes);
-            if (ImGui::Button("Video",ImVec2(70*multiplyRes,30*multiplyRes))){
+            ImVec2 downstartpos = ImGui::GetCursorPos();
+            if(Custom_ButtonwImage("Video",ImVec2(90*multiplyRes,30*multiplyRes))){
                 show_videomenu = true;
             }
             ImGui::SameLine();
-            if (ImGui::Button("Audio",ImVec2(70*multiplyRes,30*multiplyRes))){
+            if (Custom_ButtonwImage("Audio",ImVec2(90*multiplyRes,30*multiplyRes))){
                 show_audiotracks = true;
             }
             ImGui::SameLine();
-            if (ImGui::Button("Subtitles",ImVec2(70*multiplyRes,30*multiplyRes))){
+            if (Custom_ButtonwImage("Subtitles",ImVec2(100*multiplyRes,30*multiplyRes))){
                 show_subtracks = true;
             }
             ImGui::SameLine();
-            if (ImGui::Button("Chapters",ImVec2(70*multiplyRes,30*multiplyRes))){
+            if (Custom_ButtonwImage("Chapters",ImVec2(100*multiplyRes,30*multiplyRes))){
                 show_chapters = true;
                 fflush(stdout);
+            }
+            
+            ImGui::SetCursorPos(downstartpos);
+            ImGui::SetCursorPosX(1240.0f*multiplyRes-90.0f*multiplyRes);
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY()-10.0f*multiplyRes);
+            if(CurrentDiscType == DiscType::DVD_VIDEO){
+                ImGui::Image((ImTextureID)(intptr_t)imgloader->icons.DVDVideo_Icon.id, ImVec2((60.0f*multiplyRes),imgloader->icons.DVDVideo_Icon.height*(60.0f*multiplyRes)/imgloader->icons.DVDVideo_Icon.width));
+            }
+            if(CurrentDiscType == DiscType::BLU_RAY){
+                ImGui::Image((ImTextureID)(intptr_t)imgloader->icons.BluRay_Icon.id, ImVec2((60.0f*multiplyRes),imgloader->icons.BluRay_Icon.height*(60.0f*multiplyRes)/imgloader->icons.BluRay_Icon.width));
+            }
+            if(CurrentDiscType == DiscType::SVCD){
+                ImGui::Image((ImTextureID)(intptr_t)imgloader->icons.SVCD_Icon.id, ImVec2((60.0f*multiplyRes),imgloader->icons.SVCD_Icon.height*(60.0f*multiplyRes)/imgloader->icons.SVCD_Icon.width));
+            }
+            if(CurrentDiscType == DiscType::VCD){
+                ImGui::Image((ImTextureID)(intptr_t)imgloader->icons.VCD_Icon.id, ImVec2((60.0f*multiplyRes),imgloader->icons.VCD_Icon.height*(60.0f*multiplyRes)/imgloader->icons.VCD_Icon.width));
             }
             
             ImGui::PopStyleColor(2);
@@ -194,8 +205,8 @@ void CGUI::PlayerGUI(){
 
 
 void CGUI::AudioTracks(){
-    float _myw = 500.0f;
-    float _myh = 300.0f;
+    float _myw = 500.0f*multiplyRes;
+    float _myh = 300.0f*multiplyRes;
     
     appWindows::SetupOptsWindow(ImVec2(_myw,_myh));
     if (ImGui::Begin("##audiotracks", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse)) {
@@ -266,8 +277,8 @@ void CGUI::AudioTracks(){
 }
 
 void CGUI::SubTracks(){
-    float _myw = 500.0f;
-    float _myh = 300.0f;
+    float _myw = 500.0f*multiplyRes;
+    float _myh = 300.0f*multiplyRes;
     
     appWindows::SetupOptsWindow(ImVec2(_myw,_myh));
     if (ImGui::Begin("##subtracks", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse)) {
@@ -336,8 +347,8 @@ void CGUI::SubTracks(){
 
 
 void CGUI::ChaptersList(){
-    float _myw = 500.0f;
-    float _myh = 300.0f;
+    float _myw = 500.0f*multiplyRes;
+    float _myh = 300.0f*multiplyRes;
     
     appWindows::SetupOptsWindow(ImVec2(_myw,_myh));
     
@@ -356,10 +367,7 @@ void CGUI::ChaptersList(){
                 }
                 if(libmpv !=nullptr && libmpv->_playidx >= 0){
                     static int selected = -1;
-                    ImGui::PushStyleColor(ImGuiCol_TableBorderLight, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Bianco opaco
-                    ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 12.0f)); // X=8, Y=12 (default è circa 4,2)
-                    ImGuiTableFlags flags = ImGuiTableFlags_Borders |       // Bordi esterni
-                                            ImGuiTableFlags_RowBg|ImGuiTableFlags_ScrollY;
+                    /*
                     ImVec2 outer_size = ImVec2(0,200);
                     if (ImGui::BeginTable("##chaptertable", 1, flags, outer_size)) { 
                         for(int i=0;i<_titles_list[libmpv->_playidx].chapters.size();i++){
@@ -379,8 +387,28 @@ void CGUI::ChaptersList(){
                         }
                         ImGui::EndTable();
                     }
-                    ImGui::PopStyleColor();
-                    ImGui::PopStyleVar();
+                    */
+                    for(int i=0;i<_titles_list[libmpv->_playidx].chapters.size();i++){
+                        std::string _itemid = "##chapitem" + std::to_string(i);
+                        ImVec2 _startpos = ImGui::GetCursorPos();
+                        int _chapidx = -1;
+                        if(libmpv->BLURAYNAV){
+                            _chapidx = libmpv->BLURAYNAV->GetChapterIDX(libmpv->_playidx,libmpv->current_playback_time);
+                        }
+                        if(libmpv->DVDNAV){
+                            _chapidx = libmpv->DVDNAV->GetChapterIDX(libmpv->_playidx,libmpv->current_playback_time);
+                        }
+                        if(ImGui::Selectable(_itemid.c_str(), i==_chapidx)){
+                                libmpv->seekToSecond(_titles_list[libmpv->_playidx].chapters[i].start);
+                        }
+                        ImGui::SameLine();
+                        ImGui::SetCursorPos(_startpos);
+                        std::string entryname = "Chapter " + std::to_string(_titles_list[libmpv->_playidx].chapters[i].num)+ " " + millisecondsToTimeStringFast(_titles_list[libmpv->_playidx].chapters[i].start*1000);
+                            
+                        ImGui::Text(entryname.c_str());
+                    }
+                    
+                
 					
             }
         }
@@ -393,8 +421,8 @@ void CGUI::ChaptersList(){
 
 
 void CGUI::VideoMenu(){
-    float _myw = 500.0f;
-    float _myh = 300.0f;
+    float _myw = 500.0f*multiplyRes;
+    float _myh = 300.0f*multiplyRes;
     
     appWindows::SetupOptsWindow(ImVec2(_myw,_myh));
     if (ImGui::Begin("##videomenu", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse)) {
