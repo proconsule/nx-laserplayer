@@ -3,32 +3,7 @@
 #include <string>
 #include <stdint.h>
 
-std::string millisecondsToTimeStringFast(long long milliseconds) {
-    long long totalSeconds = milliseconds / 1000;
-    
-    int hours = totalSeconds / 3600;
-    int minutes = (totalSeconds % 3600) / 60;
-    int seconds = totalSeconds % 60;
-    
-    std::string result;
-    result.reserve(8); // "HH:MM:SS" = 8 caratteri
-    
-    // Ore
-    result += (hours < 10) ? "0" : "";
-    result += std::to_string(hours);
-    result += ":";
-    
-    // Minuti
-    result += (minutes < 10) ? "0" : "";
-    result += std::to_string(minutes);
-    result += ":";
-    
-    // Secondi
-    result += (seconds < 10) ? "0" : "";
-    result += std::to_string(seconds);
-    
-    return result;
-}
+
 
 ColorStates GenerateColorStatesHSV(ImVec4 base_color, float hover_brightness, float active_brightness)
 {
@@ -319,7 +294,7 @@ bool Custom_Button(const char* _label, ImVec2 _size,float _scale) {
     return pressed;
 }
 
-bool Custom_ButtonwImage(const char* _label, ImVec2 _size, float _scale,Texture * _buttexture) {
+bool Custom_ButtonwImage(const char* _label, ImVec2 _size, float _scale,Texture * _buttexture,ImVec4 *mybackcolor) {
     ImGuiWindow* window = ImGui::GetCurrentWindow();
     if (window->SkipItems) return false;
 
@@ -356,10 +331,14 @@ bool Custom_ButtonwImage(const char* _label, ImVec2 _size, float _scale,Texture 
     bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held);
 
     ImU32 bg_color;
+    ColorStates mybackstates = GenerateColorStatesHSV(style.Colors[ImGuiCol_Button]);
+    if(mybackcolor){
+        mybackstates = GenerateColorStatesHSV(*mybackcolor);
+    }
     if (held) {
-        bg_color = ImGui::GetColorU32(ImGuiCol_ButtonActive);
+        bg_color = ImGui::GetColorU32(ImGui::ColorConvertFloat4ToU32(mybackstates.active));
     } else {
-        bg_color = hovered ? ImGui::GetColorU32(ImGuiCol_ButtonHovered) : ImGui::GetColorU32(ImGuiCol_Button);
+        bg_color = hovered ? ImGui::ColorConvertFloat4ToU32(mybackstates.hovered) : ImGui::ColorConvertFloat4ToU32(mybackstates.normal);
     }
 
     ImDrawList* draw_list = window->DrawList;
@@ -423,6 +402,117 @@ bool Custom_ButtonwImage(const char* _label, ImVec2 _size, float _scale,Texture 
 
     return pressed;
 }
+
+bool Custom_ImageButton(const char* _hiddenlabel, ImVec2 _size,Texture * _buttexture,ImVec4 *mybackcolor) {
+    ImGuiWindow* window = ImGui::GetCurrentWindow();
+    if (window->SkipItems) return false;
+
+    ImGuiContext& g = *ImGui::GetCurrentContext();
+    const ImGuiStyle& style = g.Style;
+    const ImGuiID id = window->GetID(_hiddenlabel);
+
+    ImFont* font = ImGui::GetFont();
+    float imfontsize = ImGui::CalcTextSize("A").y;
+    ImVec2 label_size = _size;
+    label_size.x = 0.0f;
+    label_size.y = label_size.y-style.ItemSpacing.y*2.0;
+    
+    
+    // Dimensione dell'immagine
+    
+    // Calcola la larghezza totale del contenuto (testo + immagine)
+    float content_width = label_size.x;
+    if (_buttexture) {
+        ImVec2 image_size = ImVec2(label_size.y, _buttexture->height*label_size.y/_buttexture->width); // Usa l'altezza del testo come dimensione dell'immagine (quadrata)
+    
+        content_width += image_size.x; // Aggiungi la larghezza dell'immagine e uno spazio
+    }
+
+    ImVec2 pos = window->DC.CursorPos;
+
+    if (_size.x <= 0.0f) _size.x = content_width + style.FramePadding.x * 2.0f;
+    if (_size.y <= 0.0f) _size.y = label_size.y + style.FramePadding.y * 2.0f;
+
+    const ImRect bb(pos, ImVec2(pos.x + _size.x, pos.y + _size.y));
+    ImGui::ItemSize(_size, style.FramePadding.y);
+    if (!ImGui::ItemAdd(bb, id)) return false;
+
+    bool hovered, held;
+    bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held);
+
+    ImU32 bg_color;
+    ColorStates mybackstates = GenerateColorStatesHSV(style.Colors[ImGuiCol_Button]);
+    if(mybackcolor){
+        mybackstates = GenerateColorStatesHSV(*mybackcolor);
+    }
+    if (held) {
+        bg_color = ImGui::GetColorU32(ImGui::ColorConvertFloat4ToU32(mybackstates.active));
+    } else {
+        bg_color = hovered ? ImGui::ColorConvertFloat4ToU32(mybackstates.hovered) : ImGui::ColorConvertFloat4ToU32(mybackstates.normal);
+    }
+
+    ImDrawList* draw_list = window->DrawList;
+    draw_list->AddRectFilled(bb.Min, bb.Max, bg_color, style.FrameRounding);
+    
+    if(hovered){
+        ImVec2 _h_min = bb.Min;
+        ImVec2 _h_max = bb.Max;
+        _h_min.x = _h_min.x-8.0f;
+        _h_min.y = _h_min.y-8.0f;
+        _h_max.x = _h_max.x+8.0f;
+        _h_max.y = _h_max.y+8.0f;
+        
+        draw_list->AddRect(_h_min, _h_max, IM_COL32(255, 255, 255, 255), style.FrameRounding,0,2.0f);
+    }
+    else if(held){
+        ImVec2 _h_min = bb.Min;
+        ImVec2 _h_max = bb.Max;
+        _h_min.x = _h_min.x-12.0f;
+        _h_min.y = _h_min.y-12.0f;
+        _h_max.x = _h_max.x+12.0f;
+        _h_max.y = _h_max.y+12.0f;
+        
+        draw_list->AddRect(_h_min, _h_max, IM_COL32(255, 255, 255, 255), style.FrameRounding,0,2.0f);
+    }
+    
+    
+    ImVec2 total_size = ImVec2(content_width, label_size.y);
+    ImVec2 text_pos;
+    ImVec2 image_pos;
+
+    ImVec2 content_start_pos = ImVec2(
+        bb.Min.x + (_size.x - total_size.x) * 0.5f,
+        bb.Min.y + (_size.y - total_size.y) * 0.5f
+    );
+    
+    image_pos = content_start_pos;
+    text_pos = ImVec2(content_start_pos.x, content_start_pos.y);
+
+    if (_buttexture) {
+        ImVec2 image_size = ImVec2(label_size.y, _buttexture->height*label_size.y/_buttexture->width); // Usa l'altezza del testo come dimensione dell'immagine (quadrata)
+    
+        image_pos = content_start_pos;
+        text_pos.x = content_start_pos.x + image_size.x + style.ItemSpacing.x; // Sposta il testo dopo l'immagine
+    }
+
+    if (held) {
+        image_pos.x += 1.0f;
+        image_pos.y += 1.0f;
+        text_pos.x += 1.0f;
+        text_pos.y += 1.0f;
+    }
+
+    if (_buttexture) {
+        ImVec2 image_size = ImVec2(label_size.y, _buttexture->height*label_size.y/_buttexture->width); // Usa l'altezza del testo come dimensione dell'immagine (quadrata)
+        image_pos = ImVec2(image_pos.x,image_pos.y+(label_size.y-image_size.y)*0.5f/*-style.ItemSpacing.y*2*/);
+        draw_list->AddImage((void *)(intptr_t)_buttexture->id, image_pos, ImVec2(image_pos.x + image_size.x, image_pos.y + image_size.y));
+    }
+
+    //draw_list->AddText(font, imfontsize * _scale, text_pos, ImGui::GetColorU32(ImGuiCol_Text), _label, nullptr);
+
+    return pressed;
+}
+
 
 bool Custom_CircleButton(const char* _label,float _diameter,Texture * _buttexture){
     ImGuiWindow* window = ImGui::GetCurrentWindow();

@@ -7,7 +7,7 @@
 
 
 libMpv::libMpv(const std::string &configDir) {
-
+    NXLOG::DEBUGLOG("MPV Create Handle\n");
     handle = mpv_create();
     if (!handle) {
         NXLOG::ERRORLOG("MPV Error Create Handle\n");
@@ -19,18 +19,18 @@ libMpv::libMpv(const std::string &configDir) {
     mpv_set_option_string(handle, "config-dir", configDir.c_str());
     mpv_set_option_string(handle, "terminal", "yes");
     //if(NXLOG::loglevel == 0){
-        mpv_set_option_string(handle, "msg-level", "all=no");
+     //   mpv_set_option_string(handle, "msg-level", "all=no");
     //}else{
-    //  mpv_set_option_string(handle, "msg-level", "all=v,vd=trace,vo=trace");
+      mpv_set_option_string(handle, "msg-level", "all=v,vd=trace,vo=trace");
     //}
     mpv_set_option_string(handle, "vd-lavc-threads", "4");
     //mpv_set_option_string(handle, "vd-lavc-skiploopfilter", "all");
     mpv_set_option_string(handle, "audio-channels", "stereo");
     mpv_set_option_string(handle, "video-timing-offset", "0");
     mpv_set_option_string(handle, "osd-bar-align-y", "0.9");
-    //mpv_set_option_string(handle, "fbo-format", "rgb10_a2");
+    mpv_set_option_string(handle, "fbo-format", "rgb10_a2");
     mpv_set_option_string(handle, "volume-max", "200");
-    //mpv_set_option_string(handle, "vd-lavc-dr", "yes");
+    mpv_set_option_string(handle, "vd-lavc-dr", "yes");
     //default Font Style
     mpv_set_option_string(handle, "sub-border-size", "3");
     mpv_set_option_string(handle, "sub-shadow-offset", "1");
@@ -61,8 +61,36 @@ libMpv::libMpv(const std::string &configDir) {
     mpv_set_option_string(handle, "hwdec-codecs", "mpeg1video,mpeg2video,mpeg4,vc1,wmv3,h264,hevc,vp8,vp9,mjpeg");
     mpv_set_option_string(handle, "ao", "hos");
     
+    /*
+    mpv_set_option_string(handle, "cache-pause-wait", "25.0");
+    mpv_set_option_string(handle, "cache-pause-initial", "yes");
+    mpv_set_option_string(handle, "demuxer-cache-wait", "yes");
+    */
     
-    
+  
+
+// Imposta l'opzione dei secondi
+
+//mpv_set_option_string(handle, "cache", "yes");
+//mpv_set_option_string(handle, "demuxer-max-bytes", "500000KiB");
+//mpv_set_option_string(handle, "demuxer-readahead-secs", "20");
+//mpv_set_option_string(handle, "stream-buffer-size", "1M");
+mpv_set_option_string(handle, "cache-pause", "no");
+
+
+
+/*
+
+
+mpv_command_string(handle, "set cache yes");
+mpv_command_string(handle, "set cache-default 32768");
+mpv_command_string(handle, "set cache-backbuffer 16384");
+
+
+mpv_set_option_string(handle, "cache-default", "32768");
+mpv_set_option_string(handle, "cache-backbuffer", "16384");
+*/
+  
     NXLOG::DEBUGLOG("MPV Handle initialize\n");
     int res = mpv_initialize(handle);
     if (res) {
@@ -100,18 +128,81 @@ void libMpv::loadBluRay(std::string _path){
         }
     }
     
-    mpv_observe_property(handle, 0, "time-pos", MPV_FORMAT_INT64);
-    mpv_observe_property(handle, 1, "duration", MPV_FORMAT_INT64);
-    mpv_observe_property(handle, 2, "pause", MPV_FORMAT_FLAG);
-    mpv_observe_property(handle, 3, "aid", MPV_FORMAT_INT64);
-    mpv_observe_property(handle, 4, "sid", MPV_FORMAT_INT64);
+    if(_playidx >=0){
     
-    std::string opencommand = "loadfile bluray://"+ std::to_string(_playidx);
-    mpv_set_option_string(handle, "bluray-device", _path.c_str());
-    mpv_command_string(handle, opencommand.c_str());
+        mpv_observe_property(handle, 0, "time-pos", MPV_FORMAT_INT64);
+        mpv_observe_property(handle, 1, "duration", MPV_FORMAT_INT64);
+        mpv_observe_property(handle, 2, "pause", MPV_FORMAT_FLAG);
+        mpv_observe_property(handle, 3, "aid", MPV_FORMAT_INT64);
+        mpv_observe_property(handle, 4, "sid", MPV_FORMAT_INT64);
+
+        
+       
+
+        std::string opencommand = "loadfile bluray://"+ std::to_string(_playidx);
+        mpv_set_option_string(handle, "bluray-device", _path.c_str());
+        mpv_command_string(handle, opencommand.c_str());
+        if(iniparser->getConfig()->audio_lang == ""){
+            mpv_set_property_string(handle, "alang", "auto");
+        }else{
+            mpv_set_property_string(handle, "alang", iniparser->getConfig()->audio_lang.c_str());
+        }
+        if(iniparser->getConfig()->sub_lang == ""){
+            mpv_set_property_string(handle, "slang", "auto");
+        }else{
+            mpv_set_property_string(handle, "slang", iniparser->getConfig()->sub_lang.c_str());
+        }
+    }
     
     
 }
+
+void libMpv::loadBDTitle(std::string _path,int _titleid){
+        _playidx = _titleid;
+        std::string opencommand = "loadfile bluray://" + std::to_string(_titleid);
+        mpv_set_option_string(handle, "bluray-device", _path.c_str());
+        mpv_command_string(handle, opencommand.c_str());
+
+        mpv_observe_property(handle, 0, "time-pos", MPV_FORMAT_INT64);
+        mpv_observe_property(handle, 1, "duration", MPV_FORMAT_INT64);
+        mpv_observe_property(handle, 2, "pause", MPV_FORMAT_FLAG);
+        mpv_observe_property(handle, 3, "aid", MPV_FORMAT_INT64);
+        mpv_observe_property(handle, 4, "sid", MPV_FORMAT_INT64);
+        if(iniparser->getConfig()->audio_lang == ""){
+            mpv_set_property_string(handle, "alang", "auto");
+        }else{
+            mpv_set_property_string(handle, "alang", iniparser->getConfig()->audio_lang.c_str());
+        }
+        if(iniparser->getConfig()->sub_lang == ""){
+            mpv_set_property_string(handle, "slang", "auto");
+        }else{
+            mpv_set_property_string(handle, "slang", iniparser->getConfig()->sub_lang.c_str());
+        }
+}
+
+void libMpv::loadDVDTitle(std::string _path,int _titleid){
+        _playidx = _titleid;
+        std::string opencommand = "loadfile dvd://" + std::to_string(_playidx);
+        mpv_set_option_string(handle, "dvd-device", _path.c_str());
+        mpv_command_string(handle, opencommand.c_str());
+
+        mpv_observe_property(handle, 0, "time-pos", MPV_FORMAT_INT64);
+        mpv_observe_property(handle, 1, "duration", MPV_FORMAT_INT64);
+        mpv_observe_property(handle, 2, "pause", MPV_FORMAT_FLAG);
+        mpv_observe_property(handle, 3, "aid", MPV_FORMAT_INT64);
+        mpv_observe_property(handle, 4, "sid", MPV_FORMAT_INT64);
+        if(iniparser->getConfig()->audio_lang == ""){
+            mpv_set_property_string(handle, "alang", "auto");
+        }else{
+            mpv_set_property_string(handle, "alang", iniparser->getConfig()->audio_lang.c_str());
+        }
+        if(iniparser->getConfig()->sub_lang == ""){
+            mpv_set_property_string(handle, "slang", "auto");
+        }else{
+            mpv_set_property_string(handle, "slang", iniparser->getConfig()->sub_lang.c_str());
+        }
+}
+
 
 void libMpv::loadSVCD(std::string _path){
     mpv_observe_property(handle, 0, "time-pos", MPV_FORMAT_INT64);
@@ -132,8 +223,13 @@ void libMpv::loadVCD(std::string _path){
 }
 
 void libMpv::loadDVD(std::string _path){
+    if(DVDNAV){
+        delete DVDNAV;
+        DVDNAV = nullptr;
+    }
     if(DVDNAV == nullptr){
         DVDNAV = new CDVDNAV(_path);
+        
     }
     
     DVDNAV->GetDVDInfo();
@@ -161,76 +257,124 @@ void libMpv::loadDVD(std::string _path){
         mpv_observe_property(handle, 2, "pause", MPV_FORMAT_FLAG);
         mpv_observe_property(handle, 3, "aid", MPV_FORMAT_INT64);
         mpv_observe_property(handle, 4, "sid", MPV_FORMAT_INT64);
-        
-        
+        if(iniparser->getConfig()->audio_lang == ""){
+            mpv_set_property_string(handle, "alang", "auto");
+        }else{
+            mpv_set_property_string(handle, "alang", iniparser->getConfig()->audio_lang.c_str());
+        }
+        if(iniparser->getConfig()->sub_lang == ""){
+            mpv_set_property_string(handle, "slang", "auto");
+        }else{
+            mpv_set_property_string(handle, "slang", iniparser->getConfig()->sub_lang.c_str());
+        }
     }
-   
 }
 
 
 void libMpv::parseTracksInfo(mpv_node *node){
-std::vector<TitleInfo::Track> rawtracklist;
+    std::vector<TitleInfo::Track> rawtracklist;
 
 
-if (node->format == MPV_FORMAT_NODE_ARRAY) {
-    for (int i = 0; i < node->u.list->num; i++) {
-        if (node->u.list->values[i].format == MPV_FORMAT_NODE_MAP) {
-            TitleInfo::Track tmptrack;
-            for (int n = 0; n < node->u.list->values[i].u.list->num; n++) {
-                std::string key = node->u.list->values[i].u.list->keys[n];
-                printf("KEY: %s\r\n",key.c_str());
-                if (key == "type") {
-                    if (node->u.list->values[i].u.list->values[n].format == MPV_FORMAT_STRING) {
-                        tmptrack.type = node->u.list->values[i].u.list->values[n].u.string;
+    if (node->format == MPV_FORMAT_NODE_ARRAY) {
+        for (int i = 0; i < node->u.list->num; i++) {
+            if (node->u.list->values[i].format == MPV_FORMAT_NODE_MAP) {
+                TitleInfo::Track tmptrack;
+                for (int n = 0; n < node->u.list->values[i].u.list->num; n++) {
+                    std::string key = node->u.list->values[i].u.list->keys[n];
+                    printf("KEY: %s\r\n",key.c_str());
+                    if (key == "type") {
+                        if (node->u.list->values[i].u.list->values[n].format == MPV_FORMAT_STRING) {
+                            tmptrack.type = node->u.list->values[i].u.list->values[n].u.string;
+                        }
                     }
-                }
-                if (key == "id") {
-                    if (node->u.list->values[i].u.list->values[n].format == MPV_FORMAT_INT64) {
-                        tmptrack.id = (int) node->u.list->values[i].u.list->values[n].u.int64;
+                    if (key == "id") {
+                        if (node->u.list->values[i].u.list->values[n].format == MPV_FORMAT_INT64) {
+                            tmptrack.id = (int) node->u.list->values[i].u.list->values[n].u.int64;
+                        }
                     }
-                }
-                if (key == "lang") {
-                    if (node->u.list->values[i].u.list->values[n].format == MPV_FORMAT_STRING) {
-                        tmptrack.language = node->u.list->values[i].u.list->values[n].u.string;
+                    if (key == "lang") {
+                        if (node->u.list->values[i].u.list->values[n].format == MPV_FORMAT_STRING) {
+                            tmptrack.language = node->u.list->values[i].u.list->values[n].u.string;
+                        }
                     }
-                }
-                if (key == "codec") {
-                    if (node->u.list->values[i].u.list->values[n].format == MPV_FORMAT_STRING) {
-                        tmptrack.codec = node->u.list->values[i].u.list->values[n].u.string;
+                    if (key == "codec") {
+                        if (node->u.list->values[i].u.list->values[n].format == MPV_FORMAT_STRING) {
+                            tmptrack.codec = node->u.list->values[i].u.list->values[n].u.string;
+                        }
                     }
+                    if (key == "selected") {
+                        tmptrack.selected = (bool)node->u.list->values[i].u.list->values[n].u.flag;
+                    }
+                    
                 }
-                if (key == "selected") {
-                    tmptrack.selected = (bool)node->u.list->values[i].u.list->values[n].u.flag;
-                }
-                
+                rawtracklist.push_back(tmptrack);
+                //printf("Track id: %d %s %s\r\n",tmptrack.id,tmptrack.type.c_str(),tmptrack.language.c_str());
             }
-            rawtracklist.push_back(tmptrack);
-            //printf("Track id: %d %s %s\r\n",tmptrack.id,tmptrack.type.c_str(),tmptrack.language.c_str());
+            
         }
         
     }
+
+    if(DVDNAV!=nullptr && this->_playidx >= 0 ){
+        DVDNAV->updateTitleTracksList(this->_playidx,rawtracklist);
+    }
+    if(BLURAYNAV!=nullptr && this->_playidx >= 0 ){
+        BLURAYNAV->updateTitleTracksList(this->_playidx,rawtracklist);
+    }
+    if(SVCDNAV!=nullptr && this->_playidx >= 0 ){
+        SVCDNAV->updateTitleTracksList(this->_playidx,rawtracklist);
+    }
+
+
+
+
+
+}
+
+void libMpv::loadBlurayMenu(std::string _path){
+    if(BLURAYNAV){
+        delete BLURAYNAV;
+        BLURAYNAV = nullptr;
+    }
+    if(BLURAYNAV == nullptr){
+        BLURAYNAV = new CBLURAYNAV(_path);
+    }
     
+    BLURAYNAV->BDInfo();
+    
+    
+    for(int i=0;i<BLURAYNAV->titles_info.size();i++){
+        printf("Title: %u Duration: %u Parts: %u\r\n",BLURAYNAV->titles_info[i].titlenum,BLURAYNAV->titles_info[i].titletime,BLURAYNAV->titles_info[i].chapters.size());
+     
+        for(int j =0 ;j<BLURAYNAV->titles_info[i].chapters.size();j++){
+            printf("\tChapter %d start: %d end: %d duration: %d\r\n",BLURAYNAV->titles_info[i].chapters[j].num,BLURAYNAV->titles_info[i].chapters[j].start,BLURAYNAV->titles_info[i].chapters[j].end,BLURAYNAV->titles_info[i].chapters[j].duration);
+        }
+    }
 }
-
-if(DVDNAV!=nullptr && this->_playidx >= 0 ){
-    DVDNAV->updateTitleTracksList(this->_playidx,rawtracklist);
-}
-if(BLURAYNAV!=nullptr && this->_playidx >= 0 ){
-    BLURAYNAV->updateTitleTracksList(this->_playidx,rawtracklist);
-}
-
-
-
-
-}
-
-
 
 void libMpv::loadDvdMenu(std::string _path){
+    if(DVDNAV){
+        delete DVDNAV;
+        DVDNAV = nullptr;
+    }
     if(DVDNAV == nullptr){
         DVDNAV = new CDVDNAV(_path);
     }
-    DVDNAV->GetDVDMenu();
+    
+    DVDNAV->GetDVDInfo();
+    
+    int _testduration = 0;
+    for(int i=0;i<DVDNAV->titles_info.size();i++){
+        printf("Title: %u Duration: %u Parts: %u\r\n",DVDNAV->titles_info[i].titlenum,DVDNAV->titles_info[i].titletime,DVDNAV->titles_info[i].chapters.size());
+        if(DVDNAV->titles_info[i].titletime>_testduration){
+            _playidx = i;
+            _testduration = DVDNAV->titles_info[i].titletime;
+        }
+        
+        for(int j =0 ;j<DVDNAV->titles_info[i].chapters.size();j++){
+            printf("\tChapter %d start: %d end: %d duration: %d\r\n",DVDNAV->titles_info[i].chapters[j].num,DVDNAV->titles_info[i].chapters[j].start,DVDNAV->titles_info[i].chapters[j].end,DVDNAV->titles_info[i].chapters[j].duration);
+        }
+    }
 }
 
 void libMpv::Stop(){
@@ -256,8 +400,7 @@ mpv_render_context *libMpv::getContext() {
 libMpv::~libMpv(){
     if(DVDNAV!=nullptr)delete DVDNAV;
     if(BLURAYNAV!=nullptr)delete BLURAYNAV;
-    printf("AAAAAAAAAAAAAAAAAA\r\n");
-    fflush(stdout);
+    
     mpv_command_string(handle, "quit");
     while (1) {
     mpv_event *event = mpv_wait_event(handle, 1.0);
@@ -266,13 +409,10 @@ libMpv::~libMpv(){
         }
         
     }
-     printf("BBBBBBBBBBBBBBBBBBB\r\n");
-     fflush(stdout);
-    
+     
     if (handle) {
         mpv_terminate_destroy(handle);
-         printf("CCCCCCCCCCCCCCCCCCCCCCCCCCC\r\n");
-         fflush(stdout);
+         
     }
 }
 

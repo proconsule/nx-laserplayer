@@ -26,6 +26,7 @@ public:
 	libMpv *libmpv = nullptr;
 	CUSBDVD *usbdvd = nullptr;
 	CImgLoader *imgloader = nullptr;
+    CIniParser *iniparser = nullptr;
 	
 	void CheckDiscType();
 private:
@@ -39,6 +40,12 @@ private:
 	void ChaptersList();
 	void VideoMenu();
     void Device_info_Widget();
+    
+    
+    void optionsUI();
+    
+    void DVDMenu();
+    void BDMenu();
 	
 	
 	bool B_A_PRESS = false;
@@ -72,12 +79,17 @@ private:
 	//bool dvdplayback = false;
 	float volval = 0;
 	
-	bool playguitoogle = false;
+	bool playgui_show = false;
 	
 	bool show_videomenu = false;
 	bool show_audiotracks = false;
 	bool show_subtracks = false;
 	bool show_chapters = false;
+    
+     bool show_options = false;
+        
+    bool show_dvdmenu = false;
+    bool show_bdmenu = false;
         
 	//uint32_t current_playback_time = 0;
 	//uint32_t duration_playback_time = 0;
@@ -86,6 +98,10 @@ private:
 	uint32_t gui_height;
     
     DiscType CurrentDiscType = DiscType::UNKNOWN;
+    std::string bddisc_title = "";
+    Texture bd_thumb;
+    
+    int sel_subclass = 0;
     
     void BackBut();
 	

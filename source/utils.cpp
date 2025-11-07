@@ -1,13 +1,8 @@
 #include "utils.h"
-
-#include <string>
-#include <cstdio>
 #include <sys/stat.h>
 
 #include <unistd.h>
-#define PATH_SEPARATOR "/"
-
-
+#include <algorithm>
 
 // Funzione helper per verificare se un percorso esiste
 bool pathExists(const std::string& path) {
@@ -87,5 +82,94 @@ std::string DiscTypeToString(DiscType _type) {
         case DiscType::UNKNOWN:
             return "UNKNOWN";
     }
-    return "UNKNOWN"; 
+    return "Sconosciuto"; // Ritorno di sicurezza
+}
+
+std::vector<std::string> dvd_audio_languages = { "",
+    "aa", "ab", "ae", "af", "ak", "am", "an", "ar", "as", "av", "ay", "az",
+    "ba", "be", "bg", "bh", "bi", "bm", "bn", "bo", "br", "bs", "ca", "ce",
+    "ch", "co", "cr", "cs", "cu", "cv", "cy", "da", "de", "dv", "dz", "ee",
+    "el", "en", "eo", "es", "et", "eu", "fa", "ff", "fi", "fj", "fo", "fr",
+    "fy", "ga", "gd", "gl", "gn", "gu", "gv", "ha", "he", "hi", "ho", "hr",
+    "ht", "hu", "hy", "hz", "ia", "id", "ie", "ig", "ii", "ik", "io", "is",
+    "it", "iu", "ja", "jv", "ka", "kg", "ki", "kj", "kk", "kl", "km", "kn",
+    "ko", "kr", "ks", "ku", "kv", "kw", "ky", "la", "lb", "lg", "li", "ln",
+    "lo", "lt", "lu", "lv", "mg", "mh", "mi", "mk", "ml", "mn", "mo", "mr",
+    "ms", "mt", "my", "na", "nb", "nd", "ne", "ng", "nl", "nn", "no", "nr",
+    "nv", "ny", "oc", "oj", "om", "or", "os", "pa", "pi", "pl", "ps", "pt",
+    "qu", "rm", "rn", "ro", "ru", "rw", "sa", "sc", "sd", "se", "sg", "si",
+    "sk", "sl", "sm", "sn", "so", "sq", "sr", "ss", "st", "su", "sv", "sw",
+    "ta", "te", "tg", "th", "ti", "tk", "tl", "tn", "to", "tr", "ts", "tt",
+    "tw", "ty", "ug", "uk", "ur", "uz", "ve", "vi", "vo", "wa", "wo", "xh",
+    "yi", "yo", "za", "zh", "zu"
+};
+
+std::vector<std::string> dvd_audio_languages_extended = { "Content Default",
+    "Afar", "Abkhazian", "Avestan", "Afrikaans", "Akan", "Amharic", "Aragonese",
+    "Arabic", "Assamese", "Avaric", "Aymara", "Azerbaijani", "Bashkir",
+    "Belarusian", "Bulgarian", "Bihari languages", "Bislama", "Bambara",
+    "Bengali", "Tibetan", "Breton", "Bosnian", "Catalan", "Chechen", "Chamorro",
+    "Corsican", "Cree", "Czech", "Church Slavic", "Chuvash", "Welsh", "Danish",
+    "German", "Divehi", "Dzongkha", "Ewe", "Greek", "English", "Esperanto",
+    "Spanish", "Estonian", "Basque", "Persian", "Fulah", "Finnish", "Fijian",
+    "Faroese", "French", "Western Frisian", "Irish", "Gaelic", "Galician",
+    "Guarani", "Gujarati", "Manx", "Hausa", "Hebrew", "Hindi", "Hiri Motu",
+    "Croatian", "Haitian", "Hungarian", "Armenian", "Herero", "Interlingua",
+    "Indonesian", "Interlingue", "Igbo", "Sichuan Yi", "Inupiaq", "Ido",
+    "Icelandic", "Italian", "Inuktitut", "Japanese", "Javanese", "Georgian",
+    "Kongo", "Kikuyu", "Kuanyama", "Kazakh", "Kalaallisut", "Cambodian",
+    "Kannada", "Korean", "Kanuri", "Kashmiri", "Kurdish", "Komi", "Cornish",
+    "Kirghiz", "Latin", "Luxembourgish", "Ganda", "Limburgan", "Lingala", "Lao",
+    "Lithuanian", "Luba-Katanga", "Latvian", "Malagasy", "Marshallese", "Maori",
+    "Macedonian", "Malayalam", "Mongolian", "Moldavian", "Marathi", "Malay",
+    "Maltese", "Burmese", "Nauru", "Norwegian Bokmål", "Ndebele, North",
+    "Nepali", "Ndonga", "Dutch", "Norwegian Nynorsk", "Norwegian", "Ndebele, South",
+    "Navajo", "Chichewa", "Occitan", "Ojibwa", "Oromo", "Oriya", "Ossetian",
+    "Panjabi", "Pali", "Polish", "Pushto", "Portuguese", "Quechua", "Romansh",
+    "Romanian", "Rundi", "Russian", "Kinyarwanda", "Sanskrit", "Sardinian",
+    "Sindhi", "Northern Sami", "Sango", "Serbo-Croatian", "Sinhalese", "Slovak",
+    "Slovenian", "Samoan", "Shona", "Somali", "Albanian", "Serbian", "Swati",
+    "Sotho, Southern", "Sundanese", "Swedish", "Swahili", "Tamil", "Telugu",
+    "Tajik", "Thai", "Tigrinya", "Turkmen", "Tagalog", "Tswana", "Tonga",
+    "Turkish", "Tsonga", "Tatar", "Twi", "Tahitian", "Uighur", "Ukrainian",
+    "Urdu", "Uzbek", "Venda", "Vietnamese", "Volapük", "Walloon", "Wolof",
+    "Xhosa", "Yiddish", "Yoruba", "Zhuang", "Chinese", "Zulu"
+};
+
+int getlnagIDX(std::string _lang){
+    
+    auto it = std::find(dvd_audio_languages.begin(), dvd_audio_languages.end(), _lang);
+
+    if (it != dvd_audio_languages.end()) {
+        auto index = std::distance(dvd_audio_languages.begin(), it);
+        return index;
+    } 
+    return -1;
+}
+
+std::string millisecondsToTimeStringFast(long long milliseconds) {
+    long long totalSeconds = milliseconds / 1000;
+    
+    int hours = totalSeconds / 3600;
+    int minutes = (totalSeconds % 3600) / 60;
+    int seconds = totalSeconds % 60;
+    
+    std::string result;
+    result.reserve(8); // "HH:MM:SS" = 8 caratteri
+    
+    // Ore
+    result += (hours < 10) ? "0" : "";
+    result += std::to_string(hours);
+    result += ":";
+    
+    // Minuti
+    result += (minutes < 10) ? "0" : "";
+    result += std::to_string(minutes);
+    result += ":";
+    
+    // Secondi
+    result += (seconds < 10) ? "0" : "";
+    result += std::to_string(seconds);
+    
+    return result;
 }

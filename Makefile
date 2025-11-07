@@ -50,7 +50,7 @@ GITREV:= -D'GITREV="$(shell git rev-parse --short HEAD)"'
 
 VERSION_MAJOR := 0
 VERSION_MINOR := 0
-VERSION_MICRO := 1
+VERSION_MICRO := 2
 
 APP_TITLE     := nx-laserplayer
 APP_AUTHOR    := proconsule
@@ -65,7 +65,7 @@ ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS	:=	-g -ggdb -Wall -Wno-sign-compare -O2 -ffunction-sections -DCXXOPTS_NO_RTTI\
 			$(ARCH) $(DEFINES) \
                 $(GITREV)
-CFLAGS  +=  `freetype-config --cflags` -I${PORTLIBS}/include/upnp/
+CFLAGS  +=  `aarch64-none-elf-pkg-config freetype2 --cflags` -I${PORTLIBS}/include/upnp/
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DDEKO3D_BACKEND=1
 
@@ -78,7 +78,7 @@ ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
 
-LIBS	:=  -lusbdvd -lmpv `curl-config --libs` `freetype-config --libs` -lbluray -lxml2 -ldvdnav -ldvdread  `aarch64-none-elf-pkg-config --libs libavformat libavcodec libavutil libavfilter libswscale libpostproc` -llzma -lopus -lvpx -lass -lharfbuzz -lfreetype -lfribidi -lmupdf -lmupdf-third -lfreetype  -lstdc++ -ldav1d -lpng -lbz2 -ltinyxml2 -lturbojpeg -llua5.1 -lssh2 -lmbedcrypto -lmbedx509 -lmbedtls -lmbedcrypto -lmbedx509 -lmbedtls -lsqlite3  -lgme -lopenmpt -ldeko3d -luam -larchive -lexpat -llzma -lzstd -llz4 -lbz2 -lz -lnx -lc -lz
+LIBS	:=  -lusbdvd -lmpv `curl-config --libs` `aarch64-none-elf-pkg-config mpv --libs` `aarch64-none-elf-pkg-config freetype2 --libs` -lbluray -ldvdnav -ldvdread -laacs -lnx
 
 
 

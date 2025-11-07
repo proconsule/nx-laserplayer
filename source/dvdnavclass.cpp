@@ -152,7 +152,6 @@ void CDVDNAV::GetDVDInfo(){
         return ;
     }
     for(int i=1;i<=numero_titoli;i++){
-        titles_info_struct tmp;
         
         TitleInfo tmptitle;
         

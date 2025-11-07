@@ -1,27 +1,29 @@
 #include "appwindows.h"
 #include "uiwidgets.h"
 #include "gui.h"
+#include <libbluray/bluray.h>
+#include <libbluray/meta_data.h>
 
 void CGUI::MainMenuGUI() {
         appWindows::SetupMainWindow();
 		
-		if (ImGui::Begin("nx-laserplayer", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse)) {
+		if (ImGui::Begin("###nx-laserplayer", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse)) {
 			ImGui::SetWindowFontScale(2.0f);
-                        std::string title = "nx-laserplayer " + std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR) + "."+ std::to_string(VERSION_MICRO);
+            std::string title = "nx-laserplayer " + std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR) + "."+ std::to_string(VERSION_MICRO);
 			ImGuiIO &io = ImGui::GetIO();
                         
                         
                         
                         
 			float windowwidth = ImGui::GetWindowWidth();
-                        float windowheight = ImGui::GetWindowHeight();
+            float windowheight = ImGui::GetWindowHeight();
 			float titlewidth = ImGui::CalcTextSize(title.c_str()).x;
 			ImGui::SetCursorPosX((windowwidth-titlewidth)*0.5f);
                         
 			ImGui::Text(title.c_str());
-                        ImGui::SetWindowFontScale(1.0f);
+            ImGui::SetWindowFontScale(1.0f);
                         
-			ImGui::SetCursorPosY(ImGui::GetCursorPosY()+10.0f*multiplyRes);
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY()+20.0f*multiplyRes);
                         
 			if(usbdvd->usbdvd_ctx.drive.drive_found){
 				Device_info_Widget();
@@ -29,20 +31,47 @@ void CGUI::MainMenuGUI() {
                                 ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
                                 ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f);
                                 
-                                ImGui::SetCursorPosX(30.0f*multiplyRes);
-                                ImGui::SetCursorPosY(windowheight-70.0f*multiplyRes);
                                 
                                 
                                 if(!usbdvd->usbdvd_ctx.fs.mounted){
+                                    ImGui::SetCursorPosX(30.0f*multiplyRes);
+                                    ImGui::SetCursorPosY(windowheight-70.0f*multiplyRes);
+                                
                                     float _butstartposX = ImGui::GetCursorPosX();
                                     float _butstartposY = ImGui::GetCursorPosY();
-                                    
-                                    
+ 
                                     if (Custom_ButtonwImage("Mount",ImVec2(400*multiplyRes,50*multiplyRes),2.0f,&imgloader->icons.Mount_Icon)){
-                                        usbdvd->MountDisc();
+                                        usbdvd->MountDisc(true);
                                         if(usbdvd->usbdvd_ctx.fs.mounted){
                                             CurrentDiscType = getDiscType(usbdvd->usbdvd_ctx.fs.mountpoint + std::string("/"));
                                             
+                                        }
+                                        if(CurrentDiscType == DiscType::BLU_RAY){
+                                            //usbdvd->MountIOCtl();
+                                            std::string _bdpath = usbdvd->usbdvd_ctx.fs.mountpoint + std::string("/");
+                                            //usbdvd->Cache_UDF_Small_Media_Files();
+                                            //BLURAY * test = bd_open(_bdpath.c_str(),NULL);
+                                            //const BLURAY_DISC_INFO *info;
+                                            //info = bd_get_disc_info(test);
+                                            //const meta_dl * discmeta = bd_get_meta(test);
+                                            /*
+                                            if(discmeta){
+                                                printf("DISC TITLE : %s",discmeta->di_name);
+                                                bddisc_title = std::string(discmeta->di_name);
+                                                printf("Thumbnail count     : %d\n", discmeta->thumb_count);
+                                                for (int ii = 0; ii < discmeta->toc_count; ii++) {
+                                                    printf("\tTitle %d: %s\n",
+                                                           discmeta->toc_entries[ii].title_number,
+                                                           discmeta->toc_entries[ii].title_name);
+                                                }
+                                                for (int ii = 0; ii < discmeta->thumb_count; ii++) {
+                                                    printf("\t%s\n",
+                                                           discmeta->thumbnails[ii].path);
+
+                                                }
+                                            }
+                                            bd_close(test);
+                                            */
                                         }
                                     }
                                     ImGui::SameLine();
@@ -52,6 +81,19 @@ void CGUI::MainMenuGUI() {
                                     ImGui::SetCursorPosY(endpos.y);
                                 }
                                 if(usbdvd->usbdvd_ctx.fs.mounted){
+                                    /*
+                                    if(CurrentDiscType == DiscType::BLU_RAY){
+                                        ImGui::SetWindowFontScale(2.0f);
+                                        float bdtitlewidth = ImGui::CalcTextSize(bddisc_title.c_str()).x;
+                                        ImGui::SetCursorPosX((windowwidth-bdtitlewidth)*0.5f);
+                                        ImGui::Text("%s",bddisc_title.c_str());
+                                        ImGui::SetWindowFontScale(1.0f);
+                                    }
+                                    */
+                                    ImGui::SetCursorPosX(30.0f*multiplyRes);
+                                    ImGui::SetCursorPosY(windowheight-70.0f*multiplyRes);
+                                
+                                    
                                     float _butstartposX = ImGui::GetCursorPosX();
                                     float _butstartposY = ImGui::GetCursorPosY();
                                     Texture * _textid = NULL;
@@ -68,16 +110,17 @@ void CGUI::MainMenuGUI() {
                                        _textid = &imgloader->icons.VCD_Icon;
                                     }
                                     if (Custom_ButtonwImage("Play Disc",ImVec2(400*multiplyRes,50*multiplyRes),2.0f,_textid)){
-                                        //std::string openpath = "C:\\Users\\Ceco\\SWITCH-DEV\\DVD2.iso";
-                                        //std::string openpath = usbdvd->usbdvd_ctx.fs.mountpoint + std::string("/VIDEO_TS/");
                                         std::string openpath = usbdvd->usbdvd_ctx.fs.mountpoint;
                                         if(CurrentDiscType == DiscType::BLU_RAY){
+                                            //usbdvd->Cache_Clpi_Files();
                                             libmpv->loadBluRay(openpath+ "/");
                                         }else if(CurrentDiscType == DiscType::DVD_VIDEO){
                                             usbdvd->Cache_IFO_Files();
                                             libmpv->loadDVD(openpath+ "/VIDEO_TS/");
                                         }else if(CurrentDiscType == DiscType::SVCD){
                                             libmpv->loadSVCD(openpath + "/");
+                                        }else if(CurrentDiscType == DiscType::VCD){
+                                            libmpv->loadVCD(openpath + "/");
                                         }
                                        
                                         
@@ -89,17 +132,23 @@ void CGUI::MainMenuGUI() {
 									
                                     _butstartposX = ImGui::GetCursorPosX();
                                     _butstartposY = ImGui::GetCursorPosY();
-                                    ImGui::BeginDisabled();
+                                    
                                     if(CurrentDiscType == DiscType::DVD_VIDEO){
                                         if (Custom_ButtonwImage("DVD Menu",ImVec2(400*multiplyRes,50*multiplyRes),2.0f)){
-                                       
+                                            std::string openpath = usbdvd->usbdvd_ctx.fs.mountpoint;
+                                            libmpv->loadDvdMenu(openpath+ "/VIDEO_TS/");
+                                            show_dvdmenu = true;
                                         }
                                     }
+                                    
                                     if(CurrentDiscType == DiscType::BLU_RAY){
                                         if (Custom_ButtonwImage("Blu-ray Menu",ImVec2(400*multiplyRes,50*multiplyRes),2.0f)){
-                                       
+                                            std::string openpath = usbdvd->usbdvd_ctx.fs.mountpoint;
+                                            libmpv->loadBlurayMenu(openpath+ "/");
+                                            show_bdmenu = true;
                                         }
                                     }
+                                    ImGui::BeginDisabled();
                                     if(CurrentDiscType == DiscType::SVCD){
                                         if (Custom_ButtonwImage("SVCD Filelist",ImVec2(400*multiplyRes,50*multiplyRes),2.0f)){
                                        
@@ -124,8 +173,12 @@ void CGUI::MainMenuGUI() {
                                 float _butstartposY = ImGui::GetCursorPosY();
                                 
 				
-                                if (Custom_ButtonwImage("Eject",ImVec2(400*multiplyRes,50*multiplyRes),2.0f,&imgloader->icons.Eject_Icon)){
+                                if (Custom_ButtonwImage("Eject",ImVec2(350*multiplyRes,50*multiplyRes),2.0f,&imgloader->icons.Eject_Icon)){
                                     usbdvd->Eject();
+                                }
+                                ImGui::SameLine();
+                                if (Custom_ImageButton("##OPT",ImVec2(50*multiplyRes,50*multiplyRes),&imgloader->icons.Options_Icon)){
+                                    show_options = true;
                                 }
                                     
                                 
@@ -133,17 +186,18 @@ void CGUI::MainMenuGUI() {
                                 ImGui::PopStyleVar(2);
 			
 			}else{
-                            ImGui::SetWindowFontScale(2.0f);
-                            std::string drivetotstr = "No USB Drive Found";
-                            ImVec2 text_size = ImGui::CalcTextSize("No USB Drive Found");
-                            ImGui::SetCursorPosX((windowwidth-text_size.x)*0.5f);
-                            ImGui::SetCursorPosY((windowheight-text_size.y)*0.5f);
-                                
-                            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-                            ImGui::Text("No USB Drive Found");
-                            ImGui::PopStyleColor();
-                            ImGui::SetWindowFontScale(1.0f);
-                        }
+                
+                ImGui::SetWindowFontScale(2.0f);
+                std::string drivetotstr = "No USB Drive Found";
+                ImVec2 text_size = ImGui::CalcTextSize("No USB Drive Found");
+                ImGui::SetCursorPosX((windowwidth-text_size.x)*0.5f);
+                ImGui::SetCursorPosY((windowheight-text_size.y)*0.5f);
+                    
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+                ImGui::Text("No USB Drive Found");
+                ImGui::PopStyleColor();
+                
+            }
 			
 		}
 		appWindows::ExitMainWindow();
@@ -224,12 +278,81 @@ void CGUI::Device_info_Widget(){
                 }
             }
         }
-     
-       
         ImGui::EndTable();
-        ImGui::PopStyleVar();
-        ImGui::PopItemFlag();
     }
-   
+    ImGui::PopStyleVar();
+    ImGui::PopItemFlag();
     
+}
+
+
+void CGUI::DVDMenu() {
+    appWindows::SetupMainWindow();
+    
+    float windowwidth = ImGui::GetWindowWidth();
+    float windowheight = ImGui::GetWindowHeight();
+    
+    if (ImGui::Begin("##nxdvdmenu", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse)) {
+        std::string titlestr = "DVD Pseudo Menu";
+        ImVec2 titlesize = ImGui::CalcTextSize(titlestr.c_str());
+        ImGui::SetCursorPosX((windowwidth-titlesize.x)*0.5f);
+        ImGui::Text(titlestr.c_str());
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY()+30.0f*multiplyRes);
+        if(libmpv->DVDNAV){
+            for(int i=0;i<libmpv->DVDNAV->titles_info.size();i++){
+                
+                std::string entryname = std::string("Title ") + std::to_string(i+1) + " duration " + millisecondsToTimeStringFast(libmpv->DVDNAV->titles_info[i].titletime*1000);
+                ImVec2 entrusize = ImGui::CalcTextSize(entryname.c_str());
+                std::string _itemid = "##item" + std::to_string(i);
+                ImGui::SetCursorPosX((windowwidth-entrusize.x)*0.5f);
+                ImVec2 start_pos = ImGui::GetCursorPos();
+                if(ImGui::Selectable(_itemid.c_str(), false,0,ImVec2(entrusize.x,0.0f))){
+                    std::string openpath = usbdvd->usbdvd_ctx.fs.mountpoint;
+                    libmpv->loadDVDTitle(openpath+ "/VIDEO_TS/",i);
+                }
+                ImGui::SetCursorPos(start_pos);
+                ImGui::Text("%s",entryname.c_str());    
+                
+                
+            }   
+        }
+    }
+    
+    appWindows::ExitMainWindow();
+}
+
+void CGUI::BDMenu() {
+    appWindows::SetupMainWindow();
+    
+    float windowwidth = ImGui::GetWindowWidth();
+    float windowheight = ImGui::GetWindowHeight();
+    
+    if (ImGui::Begin("##nxbdmenu", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse)) {
+        std::string titlestr = "BD Pseudo Menu";
+        ImVec2 titlesize = ImGui::CalcTextSize(titlestr.c_str());
+        ImGui::SetCursorPosX((windowwidth-titlesize.x)*0.5f);
+        ImGui::Text(titlestr.c_str());
+        
+        if(libmpv->BLURAYNAV){
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY()+30.0f*multiplyRes);
+            for(int i=0;i<libmpv->BLURAYNAV->titles_info.size();i++){
+                
+                std::string entryname = std::string("Title ") + std::to_string(i+1) + " duration " + millisecondsToTimeStringFast(libmpv->BLURAYNAV->titles_info[i].titletime*1000);
+                ImVec2 entrusize = ImGui::CalcTextSize(entryname.c_str());
+                std::string _itemid = "##item" + std::to_string(i);
+                ImGui::SetCursorPosX((windowwidth-entrusize.x)*0.5f);
+                ImVec2 start_pos = ImGui::GetCursorPos();
+                if(ImGui::Selectable(_itemid.c_str(), false,0,ImVec2(entrusize.x,0.0f))){
+                    std::string openpath = usbdvd->usbdvd_ctx.fs.mountpoint;
+                    libmpv->loadBDTitle(openpath+ "/",i);
+                }
+                ImGui::SetCursorPos(start_pos);
+                ImGui::Text("%s",entryname.c_str());    
+                
+                
+            }   
+        }
+    }
+    
+    appWindows::ExitMainWindow();
 }

@@ -426,12 +426,30 @@ void CGUI::VideoMenu(){
     
     appWindows::SetupOptsWindow(ImVec2(_myw,_myh));
     if (ImGui::Begin("##videomenu", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse)) {
+        std::vector<TitleInfo> _titles_list;
+        if(libmpv->DVDNAV!=nullptr && libmpv->_playidx >= 0){
+            _titles_list = libmpv->DVDNAV->titles_info;
+        }
+        if(libmpv->BLURAYNAV!=nullptr && libmpv->_playidx >= 0){
+            _titles_list = libmpv->BLURAYNAV->titles_info;
+        }
+        if(libmpv->SVCDNAV!=nullptr && libmpv->_playidx >= 0){
+            _titles_list = libmpv->SVCDNAV->titles_info;
+        }
+        if(_titles_list[libmpv->_playidx].videos.size()>0){
+            std::string videorestext = std::to_string(_titles_list[libmpv->_playidx].videos[0].width) + "x" + std::to_string(_titles_list[libmpv->_playidx].videos[0].height) + " " + _titles_list[libmpv->_playidx].videos[0].codec + " " + _titles_list[libmpv->_playidx].videos[0].format_name;
+            float titlewidth = ImGui::CalcTextSize(videorestext.c_str()).x;
+            ImGui::SetCursorPos(ImVec2((_myw-titlewidth)*0.5f,ImGui::GetCursorPosY()));
+            ImGui::Text(videorestext.c_str());    
+        }
+         
         std::string titlestr = "Video Aspect";
         float titlewidth = ImGui::CalcTextSize(titlestr.c_str()).x;
-        ImGui::SetCursorPos(ImVec2((_myw-titlewidth)*0.5f,10.0f));
+        ImGui::SetCursorPos(ImVec2((_myw-titlewidth)*0.5f,ImGui::GetCursorPosY()));
         ImGui::Text(titlestr.c_str());
+        
         if(libmpv!=nullptr){
-            if(libmpv->DVDNAV!=nullptr && libmpv->_playidx >= 0){
+            if(libmpv->_playidx >= 0){
                 static int selected = -1;
                 ImGui::PushStyleColor(ImGuiCol_TableBorderLight, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Bianco opaco
                 ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 12.0f)); // X=8, Y=12 (default è circa 4,2)

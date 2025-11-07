@@ -6,7 +6,7 @@
 
 #include <vector>
 #include "discinfo_common.h"
-
+#include "usbdvd.h"
 
 class CBLURAYNAV:public CDISCINFO{
 public:
@@ -14,6 +14,8 @@ public:
     ~CBLURAYNAV();
     void BDInfo();
     
+    
+    CUSBDVD *usbdvd = nullptr;
     
     //std::vector<titles_info_struct> titles;
 };

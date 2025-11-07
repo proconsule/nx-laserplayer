@@ -3,6 +3,7 @@
 
 #include <string>
 #include <filesystem>
+#include <vector>
 
 enum class DiscType {
     UNKNOWN,
@@ -16,9 +17,11 @@ enum class DiscType {
 std::string DiscTypeToString(DiscType _type);
 DiscType getDiscType(const std::string& directory_path);
 
-bool pathExists(const std::string& path);
-bool isDirectory(const std::string& path);
-std::string joinPath(const std::string& base, const std::string& sub);
+extern std::vector<std::string> dvd_audio_languages;
+extern std::vector<std::string> dvd_audio_languages_extended;
+
+int getlnagIDX(std::string _lang);
+std::string millisecondsToTimeStringFast(long long milliseconds);
 
 #endif /* UTILS_H */
 

@@ -120,7 +120,7 @@ void CGUI::HandleEvents(){
 			
 			if (is_bit_set(event_ret,BUT_A)){
 				if(libmpv->disc_playback){
-                    playguitoogle = true;
+                    playgui_show = true;
                 }
 			}
 			if (is_bit_set(event_ret,BUT_B)){
@@ -168,7 +168,21 @@ void CGUI::HandleEvents(){
                     exitLoop = true;
                 }
 			}
-			
+            
+            if (is_bit_set(event_ret,BUT_MINUS)){
+                /*
+                if(!usbdvd->usbdvd_ctx.drive.drive_found){
+                    if(sel_subclass == 0){
+                        sel_subclass = 1;
+                    }else{
+                        sel_subclass = 0;
+                    }
+                    delete usbdvd;
+                    usbdvd = new CUSBDVD(sel_subclass,true);
+                }
+                */
+			}
+
 			if(is_bit_set(event_ret,B_AX_R_DOWN)){
 				
 			}
@@ -184,11 +198,20 @@ void CGUI::HandleEvents(){
 void CGUI::HandleLayers(){
 	ImGui::NewFrame();
 	if(libmpv->disc_playback==false){
-		MainMenuGUI();
-	}
-	if(libmpv->disc_playback==true && playguitoogle){
-		PlayerGUI();
-		if(show_videomenu){
+        MainMenuGUI();
+        if(show_dvdmenu){
+            DVDMenu();
+        }
+        if(show_bdmenu){
+            BDMenu();
+        }
+        if(show_options){
+            optionsUI();
+        }
+    }
+    if(libmpv->disc_playback && playgui_show){
+        PlayerGUI();
+        if(show_videomenu){
             VideoMenu();
         }
         if(show_audiotracks){
@@ -200,7 +223,7 @@ void CGUI::HandleLayers(){
         if(show_chapters){
             ChaptersList();
         }
-	}
+    }
 			
 }
 void CGUI::HandleRender(){
@@ -317,8 +340,12 @@ void CGUI::BackBut(){
         show_chapters=false;
     }else if(this->show_videomenu){
         show_videomenu=false;
-    }else if(playguitoogle){
-        playguitoogle=false;
+    }else if(playgui_show){
+        playgui_show=false;
+    }else if(show_dvdmenu){
+        show_dvdmenu=false;
+    }else if(show_bdmenu){
+        show_bdmenu=false;
     }
 }
 

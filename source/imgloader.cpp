@@ -46,6 +46,9 @@ void CImgLoader::LoadBaseTextures(std::string basepath){
 	icons.SVCD_Icon = Renderer->load_texture(basepath+"/svcd_icon.png",DkImageFormat_RGBA8_Unorm, 0);
     icons.VCD_Icon = Renderer->load_texture(basepath+"/vcd_icon.png",DkImageFormat_RGBA8_Unorm, 0);
 
+    
+    icons.Save_Icon = Renderer->load_texture(basepath+"/save.png",DkImageFormat_RGBA8_Unorm, 0);
+    icons.Options_Icon = Renderer->load_texture(basepath+"/options.png",DkImageFormat_RGBA8_Unorm, 0);
 
 	NXLOG::DEBUGLOG("DONE\r\n");
 
@@ -78,6 +81,10 @@ CImgLoader::~CImgLoader(){
 	Renderer->unregister_texture(icons.SVCD_Icon);
 	Renderer->unregister_texture(icons.VCD_Icon);
 	
+    Renderer->unregister_texture(icons.Save_Icon);
+	Renderer->unregister_texture(icons.Options_Icon);
+	
+    
 	
 	NXLOG::DEBUGLOG("Unregister Textures\r\n");
 	

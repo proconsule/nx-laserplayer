@@ -2,6 +2,8 @@
 #include <ctype.h>
 #include <utility>
 
+#define BD_DEBUG_MASK
+
 #include "nxmp-render.h"
 #include "imgui_nx.h"
 
@@ -12,8 +14,9 @@
 #include "gui.h"
 #include "usbdvd.h"
 #include "imgloader.h"
+#include "iniparser.h"
 
-#define NDEBUG 0
+#define NDEBUG  0
 
 
 extern "C" u32 __nx_applet_exit_mode, __nx_nv_service_type, __nx_nv_transfermem_size;
@@ -31,6 +34,7 @@ CUSBDVD *usbdvd = nullptr;
 
 CGUI* GUI = nullptr;
 CImgLoader *imgloader;
+CIniParser *iniparser = nullptr;
 
 
 float multiplyRes = 1.0f;
@@ -136,6 +140,7 @@ int main(int argc, const  char **argv) {
 
 /**************** This init taken from SwitchWave https://github.com/averne/SwitchWave  make it applet mode friendly  ************************/	
 
+
 	svcSetThreadPriority(CUR_THREAD_HANDLE, 0x20);
 	
 	appletLockExit();
@@ -160,7 +165,9 @@ int main(int argc, const  char **argv) {
 #ifdef NDEBUG
 	nxlinkStdio();
 #endif	
-	NXLOG::DEBUGLOG("Starting NXMP\n");
+
+    NXLOG::loglevel = 2;
+	NXLOG::DEBUGLOG("Starting nx-laserplayer\n");
 	
 
 
@@ -182,7 +189,7 @@ int main(int argc, const  char **argv) {
 		currFontsize = 27.0f;
 	}
 	
-	NXLOG::loglevel = 2;
+	
 	
 	
 	appletInitializeGamePlayRecording();
@@ -215,9 +222,10 @@ int main(int argc, const  char **argv) {
 	imgloader->Renderer = Renderer;
 	imgloader->LoadBaseTextures("romfs:");
 	
-	
-	
-	usbdvd = new CUSBDVD();
+	iniparser = new CIniParser("nx-laserplayer.ini");
+	libmpv->iniparser = iniparser;
+    
+	usbdvd = new CUSBDVD(true,true);
 	printf("USBDVD INIT DONE\r\n");
 	
 	
@@ -226,7 +234,7 @@ int main(int argc, const  char **argv) {
 	GUI->libmpv = libmpv;
 	GUI->usbdvd = usbdvd;
 	GUI->imgloader = imgloader;
-	
+	GUI->iniparser = iniparser;
     
 	
 	GUI->RenderLoop();

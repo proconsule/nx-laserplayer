@@ -6,20 +6,67 @@
 
 #include "bluraynav.h"
 
+#include <libbluray/bluray.h>
+#include <libbluray/log_control.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 CBLURAYNAV::~CBLURAYNAV(){
     
 }
 
+static void _indx_print_title(const BLURAY_TITLE *title, int normal_title)
+{
+    printf("    object type   : %s\n", title->bdj ? "BD-J" : "HDMV");
+    printf("    playback type : %s\n", title->interactive ? "Interactive" : "Movie");
+    printf(title->bdj ?
+           "    name          : %05d.bdjo\n" :
+           "    id_ref        : %u\n",
+           title->id_ref);
+
+    if (normal_title) {
+        printf("    access type   : %s%s\n", title->accessible ? "Accessible" : "Prohibited", title->hidden ? ", Hidden" : "");
+    }
+}
+
+static void _indx_print(const BLURAY_DISC_INFO *info)
+{
+    uint32_t i;
+
+    printf("\nFirst playback:\n");
+    if (info->first_play) {
+        _indx_print_title(info->first_play, 0);
+    } else {
+        printf("    (not present)\n");
+    }
+
+    printf("\nTop menu:\n");
+    if (info->top_menu) {
+        _indx_print_title(info->titles[0], 0);
+    } else {
+        printf("    (not present)\n");
+    }
+
+    printf("\nTitles: %d\n", info->num_titles);
+    for (i = 1; i <= info->num_titles; i++) {
+        printf("%02d %s\n", i, info->titles[i]->name ? info->titles[i]->name : "");
+        _indx_print_title(info->titles[i], 1);
+    }
+}
+
 void CBLURAYNAV::BDInfo(){
     BLURAY * test = bd_open(devicepath.c_str(),NULL);
+    //bd_set_debug_mask(DBG_AACS);
     int titlenums =  bd_get_titles(test, TITLES_RELEVANT, 0);
+     
+     
     
     for(int i=0;i<titlenums;i++){
         BLURAY_TITLE_INFO *testtitle =  bd_get_title_info(test, i, 0);
-        //titles_info_struct tmp;
         TitleInfo tmptitle;
         tmptitle.titlenum = i+1;
-        //get_chapter_durations_robust(dvdread,i);
         uint64_t mytime = 0;
         for(int j = 0;j<testtitle->chapter_count;j++){
             //printf("CHAP: %d %lu %lu %lu\r\n",testtitle->chapters[j].idx,testtitle->chapters[j].start/90000,testtitle->chapters[j].duration/90000,testtitle->chapters[j].offset);
@@ -28,8 +75,6 @@ void CBLURAYNAV::BDInfo(){
            tmpchapter.duration = testtitle->chapters[j].duration/90000;
            tmpchapter.start = testtitle->chapters[j].start/90000;
            tmpchapter.end = tmpchapter.start +tmpchapter.duration;
-           parts_info_struct tmppart;
-           
            tmptitle.chapters.push_back(tmpchapter);
         }
         
@@ -54,4 +99,5 @@ void CBLURAYNAV::BDInfo(){
            
         }
     }
+    bd_close(test);
 }

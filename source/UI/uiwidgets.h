@@ -5,7 +5,7 @@
 #include "imgui_internal.h"
 #include <cstdint>
 #include <string>
-#include "nxmp-render.h"
+#include "../imgloader.h"
 
 struct ColorStates {
     ImVec4 normal;
@@ -20,8 +20,11 @@ void CustomSlider(bool *_inuse,const char* label, ImVec2 *size, float* value, Im
 void LCD_Display_Widget(const char *_mainlabel,uint32_t _curr_msec,uint32_t _duration_msec,ImVec2 *_size,Texture * _disc_img = NULL);
 std::string millisecondsToTimeStringFast(long long milliseconds);
 bool Custom_Button(const char* label, ImVec2 size = ImVec2(0, 0),float _scale = 1.0f);
-bool Custom_ButtonwImage(const char* _label, ImVec2 size = ImVec2(0, 0),float _scale = 1.0f,Texture * _buttexture = NULL  );
-
+bool Custom_ButtonwImage(const char* _label, ImVec2 size = ImVec2(0, 0),float _scale = 1.0f,Texture * _buttexture = NULL ,ImVec4 *mybackcolor = NULL );
+bool Custom_ImageButton(const char* _hiddenlabel, ImVec2 _size,Texture * _buttexture,ImVec4 *mybackcolor = NULL);
+ 
 bool Custom_CircleButton(const char* _label,float _diameter,Texture * _buttexture);
-#endif /* UIWIDGETS_H */
 
+
+
+#endif /* UIWIDGETS_H */

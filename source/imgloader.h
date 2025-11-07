@@ -27,6 +27,9 @@ typedef struct {
     Texture SVCD_Icon;
     Texture BluRay_Icon;
     Texture DVDVideo_Icon;
+    
+    Texture Save_Icon;
+    Texture Options_Icon;
 		
 } nxlaser_icon_struct;
 	

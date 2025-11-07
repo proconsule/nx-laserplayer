@@ -13,6 +13,9 @@
 
 #include "dvdnavclass.h"
 #include "bluraynav.h"
+#include "svcdnav.h"
+#include "iniparser.h"
+#include "usbdvd.h"
 
 #include "logger.h"
 
@@ -31,6 +34,9 @@ public:
     void loadVCD(std::string _path);
     void loadFile(std::string _path);
 	void loadDvdMenu(std::string _path);
+    void loadBlurayMenu(std::string _path);
+    void loadDVDTitle(std::string _path,int _titleid);
+    void loadBDTitle(std::string _path,int _titleid);
 	void Stop();
 	void set_audio_track(uint32_t _idx);
 	void set_sub_track(uint32_t _idx);
@@ -51,7 +57,11 @@ public:
 	
 	CDVDNAV* DVDNAV = nullptr;
     CBLURAYNAV *BLURAYNAV = nullptr;
+    CSVCDNAV *SVCDNAV = nullptr;
+    
+    CUSBDVD* usbdvd = nullptr;
 	int _playidx = -1;
+    CIniParser *iniparser;
     
     void processEvents();
     
