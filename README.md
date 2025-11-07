@@ -23,7 +23,7 @@ For AACS Decoding
 Thanks to [libusbdvd](https://github.com/proconsule/libusbdvd) it features:
 
  - DVD Video playback (supporting Commercial DVD-Video)
- - Blu-ray playback (supporting Commercial Bluray with AACSv1, Bluray Ultra with AACSv2 are not supported)
+ - Blu-ray playback (AACSv1 is managed by the player)
  - SVCD playback
  - VCD playback
 
@@ -38,4 +38,5 @@ You need an external optical drive connected via USB to the Switch, a dock with 
 For Blu-ray decoding thanks to
 
 https://images.videolan.org/developers/libbluray.html
+
 https://images.videolan.org/developers/libaacs.html
