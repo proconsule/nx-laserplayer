@@ -78,7 +78,7 @@ ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
 
-LIBS	:=  -lusbdvd -lmpv `curl-config --libs` `aarch64-none-elf-pkg-config mpv --libs` `aarch64-none-elf-pkg-config freetype2 --libs` -lbluray -ldvdnav -ldvdread -laacs -ldeko3d -luam -lnx
+LIBS	:=  -lusbdvd -lmpv `curl-config --libs` `aarch64-none-elf-pkg-config mpv --libs` `aarch64-none-elf-pkg-config freetype2 --libs` -lbluray -ldvdnav -ldvdread -laacs -lopenmpt -lgme -lmodplug -lmpg123 -lvorbisfile -lvorbis -logg -lvpx -ldeko3d -luam -lnx
 
 
 
