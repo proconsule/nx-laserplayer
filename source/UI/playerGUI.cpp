@@ -215,6 +215,8 @@ void CGUI::AudioTracks(){
                 ImGui::SetCursorPos(ImVec2((_myw-titlewidth)*0.5f,10.0f));
                 ImGui::Text(titlestr.c_str());
 
+		float _footerH = 50.0f*multiplyRes;
+		float _headerH = ImGui::GetCursorPosY() + 10.0f*multiplyRes;
 		if(libmpv!=nullptr){
                         std::vector<TitleInfo> _titles_list;
                         if(libmpv->DVDNAV!=nullptr && libmpv->_playidx >= 0){
@@ -225,6 +227,11 @@ void CGUI::AudioTracks(){
                         }
 			if(libmpv !=nullptr && libmpv->_playidx >= 0){
                                 static int selected = -1;
+
+                                ImGui::SetCursorPosY(_headerH);
+                                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+                                ImGui::BeginChild("##audiotracks_scroll", ImVec2(_myw, _myh-_headerH-_footerH), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NavFlattened);
+
                                 ImGui::PushStyleColor(ImGuiCol_TableBorderLight, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Bianco opaco
                                 ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 12.0f)); // X=8, Y=12 (default è circa 4,2)
 
@@ -261,6 +268,9 @@ void CGUI::AudioTracks(){
                                 
                                 ImGui::PopStyleColor();
                                 ImGui::PopStyleVar();
+
+                                ImGui::EndChild();
+                                ImGui::PopStyleColor();
 				
 			}
 		}
@@ -287,6 +297,8 @@ void CGUI::SubTracks(){
                 ImGui::SetCursorPos(ImVec2((_myw-titlewidth)*0.5f,10.0f));
                 ImGui::Text(titlestr.c_str());
         
+		float _footerH = 50.0f*multiplyRes;
+		float _headerH = ImGui::GetCursorPosY() + 10.0f*multiplyRes;
 		if(libmpv!=nullptr){
 			std::vector<TitleInfo> _titles_list;
                         if(libmpv->DVDNAV!=nullptr && libmpv->_playidx >= 0){
@@ -297,6 +309,11 @@ void CGUI::SubTracks(){
                         }
 			if(libmpv !=nullptr && libmpv->_playidx >= 0){
                                 static int selected = -1;
+
+                                ImGui::SetCursorPosY(_headerH);
+                                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+                                ImGui::BeginChild("##subtracks_scroll", ImVec2(_myw, _myh-_headerH-_footerH), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NavFlattened);
+
                                 ImGui::PushStyleColor(ImGuiCol_TableBorderLight, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Bianco opaco
                                 ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 12.0f)); // X=8, Y=12 (default è circa 4,2)
                                 ImGuiTableFlags flags = ImGuiTableFlags_Borders |       // Bordi esterni
@@ -329,6 +346,9 @@ void CGUI::SubTracks(){
                                 }
                                 ImGui::PopStyleColor();
                                 ImGui::PopStyleVar();
+
+                                ImGui::EndChild();
+                                ImGui::PopStyleColor();
 					
 			}
 		}

@@ -50,7 +50,7 @@ GITREV:= -D'GITREV="$(shell git rev-parse --short HEAD)"'
 
 VERSION_MAJOR := 0
 VERSION_MINOR := 0
-VERSION_MICRO := 2
+VERSION_MICRO := 3
 
 APP_TITLE     := nx-laserplayer
 APP_AUTHOR    := proconsule

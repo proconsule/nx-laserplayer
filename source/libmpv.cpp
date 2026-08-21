@@ -2,6 +2,8 @@
 #include <sstream>
 #include "libmpv.h"
 #include <stdio.h>
+#include <algorithm>
+#include <cctype>
 //#include "utils.h"
 
 
@@ -71,11 +73,11 @@ libMpv::libMpv(const std::string &configDir) {
 
 // Imposta l'opzione dei secondi
 
-//mpv_set_option_string(handle, "cache", "yes");
-//mpv_set_option_string(handle, "demuxer-max-bytes", "500000KiB");
-//mpv_set_option_string(handle, "demuxer-readahead-secs", "20");
-//mpv_set_option_string(handle, "stream-buffer-size", "1M");
-mpv_set_option_string(handle, "cache-pause", "no");
+mpv_set_option_string(handle, "cache", "yes");
+mpv_set_option_string(handle, "demuxer-max-bytes", "150MiB");
+mpv_set_option_string(handle, "demuxer-readahead-secs", "5");
+mpv_set_option_string(handle, "stream-buffer-size", "4M");
+//mpv_set_option_string(handle, "cache-pause", "no");
 
 
 
@@ -315,6 +317,44 @@ void libMpv::parseTracksInfo(mpv_node *node){
         
     }
 
+    {
+        auto isTrueHD = [](const std::string &codec){
+            std::string c = codec;
+            std::transform(c.begin(), c.end(), c.begin(), [](unsigned char ch){ return std::tolower(ch); });
+            return c.find("truehd") != std::string::npos;
+        };
+
+        const TitleInfo::Track* selectedAudio = nullptr;
+        for(const auto &t : rawtracklist){
+            if(t.type == "audio" && t.selected){
+                selectedAudio = &t;
+                break;
+            }
+        }
+
+        if(selectedAudio != nullptr && isTrueHD(selectedAudio->codec)){
+            const TitleInfo::Track* fallback = nullptr;
+            const TitleInfo::Track* fallbackSameLang = nullptr;
+            for(const auto &t : rawtracklist){
+                if(t.type == "audio" && !isTrueHD(t.codec)){
+                    if(fallback == nullptr){
+                        fallback = &t;
+                    }
+                    if(fallbackSameLang == nullptr && t.language == selectedAudio->language){
+                        fallbackSameLang = &t;
+                    }
+                }
+            }
+            const TitleInfo::Track* chosen = (fallbackSameLang != nullptr) ? fallbackSameLang : fallback;
+            if(chosen != nullptr){
+                NXLOG::DEBUGLOG("Default audio track is TrueHD (id:%d) - switching to non-TrueHD track id:%d (%s)\n", selectedAudio->id, chosen->id, chosen->codec.c_str());
+                set_audio_track(chosen->id);
+            }else{
+                NXLOG::DEBUGLOG("Default audio track is TrueHD (id:%d) but no non-TrueHD alternative was found\n", selectedAudio->id);
+            }
+        }
+    }
+
     if(DVDNAV!=nullptr && this->_playidx >= 0 ){
         DVDNAV->updateTitleTracksList(this->_playidx,rawtracklist);
     }
@@ -448,7 +488,8 @@ void libMpv::set_sub_track(uint32_t _idx){
 }
 
 void libMpv::seekToSecond(double seconds){
-    const char* cmd[] = {"seek", std::to_string(seconds).c_str(), "absolute", nullptr};
+    std::string secstr = std::to_string(seconds);
+    const char* cmd[] = {"seek", secstr.c_str(), "absolute+keyframes", nullptr};
     int error = mpv_command(handle, cmd);
 }
 

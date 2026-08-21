@@ -9,7 +9,7 @@ The two mayor protection systems are implemented in this way
 - CSS is managed by libusbdvd so all DVD are are recognized as unprotected disc
 - AACSv1 is managed by the player itself using libbluray libaacs and mbedtls (need a keyfile just like VLC)
 
-ONLY H264 Bluray disc are supported since Switch dont have an hw decoder for VC1
+All Blu-ray HD AACSv1 are supported
 Blu-ray ULTRA (4k) are NOT supported
 
 For AACS Decoding 
@@ -30,6 +30,7 @@ Thanks to [libusbdvd](https://github.com/proconsule/libusbdvd) it features:
 Thanks to averne [mpv](https://github.com/averne/mpv) it features:
 
  - MPEG2 HW Decoder
+ - VC1 HW Decoder
  - H264 HW Decoder
  - H265 HW Decoder (with HDR support)
 
